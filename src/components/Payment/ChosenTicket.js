@@ -1,16 +1,21 @@
 import styled from 'styled-components';
 
-export default function ChosenTicket({ type, includesHotel, price }) {
+export default function ChosenTicket({ ticketInfo }) {
+  ticketInfo = { ticketType: 'Presencial', includesHotel: true, price: 600.0 };
   return (
-    <Container>
-      <p className="title">Ingresso escolhido</p>
-      <TicketInfo>
-        <div>
-          <p className="info">Presencial + Com hotel</p>
-          <p className="price">R$ 600</p>
-        </div>
-      </TicketInfo>
-    </Container>
+    <>
+      <Container>
+        <p className="title">Ingresso escolhido</p>
+        <TicketInfo>
+          <div>
+            <p className="info">
+              {`${ticketInfo.ticketType}`} {ticketInfo.includesHotel && ' + Com hotel'}
+            </p>
+            <p className="price">{ticketInfo.price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</p>
+          </div>
+        </TicketInfo>
+      </Container>
+    </>
   );
 }
 
