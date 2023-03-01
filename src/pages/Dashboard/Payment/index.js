@@ -7,15 +7,30 @@ import { getTicketByUserId } from '../../../services/ticketApi';
 
 export default function Payment() {
   const token = useToken();
-  const [ticketInfo, setTicketInfo] = useState(null);
+  const [ticketData, setTicketData] = useState(null);
 
   async function fetchTicketData() {
     try {
       const res = await getTicketByUserId(token);
-      setTicketInfo(res.data);
+      setTicketData(res.data);
     } catch (error) {
-      toast.error('Algo deu errado');
-      // console.log(error);
+      const { response } = error;
+      const notify = (message, type) =>
+        toast(message, {
+          position: toast.POSITION.TOP_CENTER,
+          pauseOnFocusLoss: false,
+          delay: 3000,
+          type: type,
+          limit: 1,
+        });
+
+      if (response.message) {
+        notify(response.message, toast.TYPE.ERROR);
+      } else if (response.status === 404) {
+        notify('Nenhum ingresso encontrado!', toast.TYPE.INFO);
+      } else {
+        notify('Erro inesperado!', toast.TYPE.ERROR);
+      }
     }
   }
 
@@ -27,16 +42,8 @@ export default function Payment() {
     <>
       <Container>
         <h1>Ingresso e pagamento</h1>
-        <ChosenTicket ticketInfo={ticketInfo} />
+        <ChosenTicket ticketInfo={ticketData} />
       </Container>
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        closeOnClick
-        pauseOnFocusLoss={false}
-        theme="light"
-        limit={1}
-      />
     </>
   );
 }
