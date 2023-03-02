@@ -13,9 +13,7 @@ export default function Payment() {
       {!showFinishPayment && <ChooseTicket />}
       {showFinishPayment && <FinishPayment />}
 
-      <button onClick={() => setShowFinishPayment(!showFinishPayment)}>
-        {showFinishPayment ? 'FINALIZAR PAGAMENTO' : 'RESERVAR INGRESSO'}
-      </button>
+      <button onClick={() => setShowFinishPayment(!showFinishPayment)}>trocar tela</button>
     </>
   );
 }
