@@ -21,17 +21,7 @@ export default function ChosenTicket({ ticketData }) {
   );
 }
 
-const Container = styled.div`
-  .title {
-    font-size: 20px;
-    line-height: 23px;
-
-    color: #8e8e8e;
-
-    margin-top: 37px;
-    margin-bottom: 17px;
-  }
-`;
+const Container = styled.div``;
 
 const TicketInfo = styled.div`
   display: flex;
