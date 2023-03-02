@@ -135,5 +135,17 @@
     "git-commit-msg-linter": "^3.2.8",
     "husky": "^7.0.2",
     "lint-staged": "^11.1.2"
+  },
+  "description": "Front-end for Driven.t, an event management solution.",
+  "main": ".prettierrc.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Drivent-group01-B/drivent-frontend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Drivent-group01-B/drivent-frontend/issues"
   }
 }
