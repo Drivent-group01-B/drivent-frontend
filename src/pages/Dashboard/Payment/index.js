@@ -5,6 +5,8 @@ import ChosenTicket from '../../../components/Payment/ChosenTicket';
 import useToken from '../../../hooks/useToken';
 import { getTicketByUserId } from '../../../services/ticketApi';
 
+import PaymentPage from '../../../components/Payment';
+
 export default function Payment() {
   const token = useToken();
   const [ticketData, setTicketData] = useState(null);
