@@ -84,10 +84,11 @@ export default function FinishPayment() {
             )}
           </Container>
         </>
-      ) : (<>
-        <Typography variant="h4" style={{ fontWeight: 700 }}>
-          Parece que você ainda não reservou nenhum ingresso =(
-        </Typography>
+      ) : (
+        <>
+          <Typography variant="h4" style={{ fontWeight: 700 }}>
+            Parece que você ainda não reservou nenhum ingresso =(
+          </Typography>
         </>
       )}
     </>
