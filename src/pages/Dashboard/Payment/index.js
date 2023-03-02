@@ -1,7 +1,5 @@
-import PaymentPage from '../../../components/Payment';
+import FinishPayment from './FinishPayment';
 
 export default function Payment() {
-  return (
-    <PaymentPage />
-  );
+  return <FinishPayment />;
 }
