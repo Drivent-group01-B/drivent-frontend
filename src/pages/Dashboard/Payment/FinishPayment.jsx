@@ -19,9 +19,13 @@ export default function FinishPayment() {
   const [loading, setLoading] = useState(true);
 
   async function fetchTicketData() {
+    //simula busca no backend
     const resolveAfter3Sec = new Promise((resolve) => setTimeout(resolve, 3000));
+
     try {
+      //aguarda simulaçao
       await resolveAfter3Sec;
+
       const res = await getTicketByUserId(token);
       setTicketData(res.data);
     } catch (error) {
