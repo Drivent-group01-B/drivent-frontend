@@ -1,7 +1,10 @@
 import useEnrollment from '../../hooks/api/useEnrollment';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
+import UserContext from '../../contexts/UserContext';
+import CreditCard from './CreditCard';
+import { CircleCheckFill } from 'akar-icons';
 
 export default function PaymentPage() {
   const { enrollment } = useEnrollment();
@@ -11,6 +14,7 @@ export default function PaymentPage() {
   const [isRemote, setIsremote] = useState(false);
   const [b1, setB1] = useState('#FFFFFF');
   const [b2, setB2] = useState('#FFFFFF');
+  const [showCard, setShowCard] = useState(true);
   useEffect(() => {
     if (enrollment) {
       setWithEnrollmentt(true);
@@ -21,13 +25,25 @@ export default function PaymentPage() {
     <>
       <StyledTypography variant="h4">Ingresso e pagamento</StyledTypography>
       {withEnrollment ? (
-        <Modalidade>
-          <P1>Primeiro, escolha sua modalidade de ingresso</P1>
-          <Caixas>
-            <Caixa back={b1} onClick={() => {setIsremote(true); setB1('#FFEED2'); setB2('#FFFFFF');}}><div>Presencial</div><Din>R$ {local}</Din></Caixa>
-            <Caixa back={b2} onClick={() => {setIsremote(false); setB1('#FFFFFF'); setB2('#FFEED2');}}><div>Online</div><Din>R$ {online}</Din></Caixa>
-          </Caixas>
-        </Modalidade>
+        <>
+          <Modalidade>
+            <P1>Primeiro, escolha sua modalidade de ingresso</P1>
+            <Caixas>
+              <Caixa back={b1} onClick={() => {setIsremote(true); setB1('#FFEED2'); setB2('#FFFFFF');}}><div>Presencial</div><Din>R$ {local}</Din></Caixa>
+              <Caixa back={b2} onClick={() => {setIsremote(false); setB1('#FFFFFF'); setB2('#FFEED2');}}><div>Online</div><Din>R$ {online}</Din></Caixa>
+            </Caixas>
+            <P1>Pagamento</P1>
+            {showCard ? 
+              <CreditCard setShowCard={setShowCard}/>
+              :
+              <Confirmation>
+                <CircleCheckFill strokeWidth={2} size={36} color="#36B853"/>
+                <p><strong>Pagamento confirmado!</strong><br/>Prossiga para escolha de hospedagem e atividades</p>
+              </Confirmation>
+            }
+          </Modalidade>
+          
+        </>
       ) : <Center><P1>Você precisa completar sua inscrição antes de prosseguir pra escolha de ingresso</P1></Center>
       }
     </>);
@@ -89,4 +105,15 @@ const Din = styled.div`
   line-height: 23px;
   text-align: center;
   color: #8E8E8E;
+`;
+
+const Confirmation = styled.div`
+display: flex;
+margin-top: 17px;
+p{
+  margin-left: 14px;
+font-style: normal;
+font-size: 14px;
+line-height: 19px;
+}
 `;
