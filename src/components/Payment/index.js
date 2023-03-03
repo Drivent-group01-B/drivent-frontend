@@ -6,7 +6,16 @@ import UserContext from '../../contexts/UserContext';
 import CreditCard from './CreditCard';
 import { CircleCheckFill } from 'akar-icons';
 
+<<<<<<< Updated upstream
 export default function PaymentPage() {
+=======
+export default function ChooseTicket({showFinishPayment, setShowFinishPayment}) {
+  const { ticketsTypes } = useTicketsTypes();
+  const [ types, setTypes ] = useState([]);
+  const [ selectedType, setSelectedType ] = useState([]);
+  const [ selectedOptionHotel, setSelectedOptionHotel ] = useState([]);
+  const [ total, setTotal ] = useState(0);
+>>>>>>> Stashed changes
   const { enrollment } = useEnrollment();
   const [withEnrollment, setWithEnrollmentt] = useState(false);
   const [local, setLocal] = useState(250);
@@ -32,6 +41,7 @@ export default function PaymentPage() {
               <Caixa back={b1} onClick={() => {setIsremote(true); setB1('#FFEED2'); setB2('#FFFFFF');}}><div>Presencial</div><Din>R$ {local}</Din></Caixa>
               <Caixa back={b2} onClick={() => {setIsremote(false); setB1('#FFFFFF'); setB2('#FFEED2');}}><div>Online</div><Din>R$ {online}</Din></Caixa>
             </Caixas>
+<<<<<<< Updated upstream
             <P1>Pagamento</P1>
             {showCard ? 
               <CreditCard setShowCard={setShowCard}/>
@@ -43,6 +53,48 @@ export default function PaymentPage() {
             }
           </Modalidade>
           
+=======
+          </Container>
+          <Container>
+            {selectedType?.length > 0 && selectedType[0].includesHotel ? (
+              <>
+                <P1>Ótimo! Agora escolha sua modalidade de hospedagem</P1>
+                <Caixas>
+                  <CardAcc
+                    key={1}
+                    id={1}
+                    price={0}
+                    name={'Sem Hotel'}
+                    selectedOptionHotel={selectedOptionHotel}
+                    select={onSelectAcc}
+                  />
+                  <CardAcc
+                    key={2}
+                    id={2}
+                    price={350}
+                    name={'Com Hotel'}
+                    selectedOptionHotel={selectedOptionHotel}
+                    select={onSelectAcc}
+                  />
+                </Caixas>
+              </>
+            ):(<></>)}
+            
+          </Container>
+          <Container>
+            {((selectedType?.length > 0 && 
+            selectedType[0].includesHotel && 
+            selectedOptionHotel?.length > 0) || 
+            (selectedType?.length > 0 && selectedType[0].isRemote)
+            ) ? (
+                <ConfirmTicket ticketTypeId={selectedType[0]?.id}
+                  value={total + (selectedOptionHotel[0] === 2 ? 350 : 0)} 
+                  showFinishPayment={showFinishPayment}
+                  setShowFinishPayment={setShowFinishPayment}/>
+              ):(<></>)}
+            
+          </Container>
+>>>>>>> Stashed changes
         </>
       ) : <Center><P1>Você precisa completar sua inscrição antes de prosseguir pra escolha de ingresso</P1></Center>
       }
