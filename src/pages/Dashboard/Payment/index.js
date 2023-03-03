@@ -11,8 +11,8 @@ export default function Payment() {
       <Typography variant="h4">Ingresso e pagamento</Typography>
 
       {!showFinishPayment && <ChooseTicket 
-      showFinishPayment={showFinishPayment}
-      setShowFinishPayment={setShowFinishPayment}/>}
+        showFinishPayment={showFinishPayment}
+        setShowFinishPayment={setShowFinishPayment}/>}
       {showFinishPayment && <FinishPayment />}
       
     </>

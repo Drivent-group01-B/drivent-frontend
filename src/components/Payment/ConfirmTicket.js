@@ -10,22 +10,20 @@ export default function ConfirmTicket({ ticketTypeId, value, showFinishPayment, 
   const config = { headers: { Authorization: `Bearer ${userData.token}` } };
 
   async function bookTicket() {
-
-    try{
+    try {
       const ticket = await createTicket(ticketTypeId, config);
-      if(ticket){
+      if(ticket) {
         setShowFinishPayment(!showFinishPayment);
         toast('Ticket reservado com sucesso!');
       }
-    } catch (error){
+    } catch (error) {
       toast('Erro inesperado!');
     }
-
   }
 
   return (
     <Container>
-      <p>Fechado! O total ficou em <strong>${value}</strong>. Agora é só confirmar:</p>
+      <p>Fechado! O total ficou em <strong>R${value}</strong>. Agora é só confirmar:</p>
       <ConfirmButton onClick={() => bookTicket()}>RESERVAR INGRESSO</ConfirmButton>
     </Container>
   );
