@@ -7,7 +7,7 @@ import CardAcc from './cardTypeAccommodation';
 import ConfirmTicket from './ConfirmTicket';
 import useTicketsTypes from '../../hooks/api/useTicketsTypes';
 
-export default function ChooseTicket() {
+export default function ChooseTicket({showFinishPayment, setShowFinishPayment}) {
   const { ticketsTypes } = useTicketsTypes();
   const [ types, setTypes ] = useState([]);
   const [ selectedType, setSelectedType ] = useState([]);
@@ -103,7 +103,9 @@ export default function ChooseTicket() {
             (selectedType?.length > 0 && selectedType[0].isRemote)
             ) ? (
                 <ConfirmTicket ticketTypeId={selectedType[0]?.id}
-                  value={total + (selectedOptionHotel[0] === 2 ? 350 : 0)} />
+                  value={total + (selectedOptionHotel[0] === 2 ? 350 : 0)} 
+                  showFinishPayment={showFinishPayment}
+                  setShowFinishPayment={setShowFinishPayment}/>
               ):(<></>)}
             
           </Container>

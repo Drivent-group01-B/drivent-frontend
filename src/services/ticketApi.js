@@ -19,3 +19,9 @@ export async function getTicketsTypes(token) {
 
   return res.data;
 }
+
+export async function createTicket(ticketTypeId, config) {
+  const res = await api.post('/tickets', {ticketTypeId}, config);
+
+  return res.data;
+}

@@ -3,31 +3,29 @@ import styled from 'styled-components';
 import axios from 'axios';
 import UserContext from '../../contexts/UserContext';
 import { toast } from 'react-toastify';
+import { createTicket } from '../../services/ticketApi.js';
 
-export default function ConfirmTicket({ ticketTypeId }) {
+export default function ConfirmTicket({ ticketTypeId, value, showFinishPayment, setShowFinishPayment }) {
   const { userData } = useContext(UserContext);
   const config = { headers: { Authorization: `Bearer ${userData.token}` } };
 
-  function bookTicket() {
-    // const promise = axios.post(`${process.env.REACT_APP_API_BASE_URL}/tickets`, {ticketTypeId}, config);
+  async function bookTicket() {
 
-    // promise.then((res) => {
-    // FAZER A TROCA DE PÁGINA   
-    // });
+    try{
+      const ticket = await createTicket(ticketTypeId, config);
+      if(ticket){
+        setShowFinishPayment(!showFinishPayment);
+        toast('Ticket reservado com sucesso!');
+      }
+    } catch (error){
+      toast('Erro inesperado!');
+    }
 
-    // promise.catch((error) => {
-    //     toast.error('Erro inesperado! ', {
-    //         position: toast.POSITION.TOP_CENTER,
-    //         pauseOnFocusLoss: false,
-    //         delay: 3000,
-    //         limit: 1,
-    //       });
-    // });
   }
 
   return (
     <Container>
-      <p>Fechado! O total ficou em <strong>R$ 600,00</strong>. Agora é só confirmar:</p>
+      <p>Fechado! O total ficou em <strong>${value}</strong>. Agora é só confirmar:</p>
       <ConfirmButton onClick={() => bookTicket()}>RESERVAR INGRESSO</ConfirmButton>
     </Container>
   );
