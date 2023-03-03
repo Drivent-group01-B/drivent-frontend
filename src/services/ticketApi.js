@@ -9,8 +9,6 @@ export async function getTicketByUserId(token) {
 
   return res.data;
 }
-<<<<<<< Updated upstream
-=======
 
 export async function getTicketsTypes(token) {
   const res = await api.get('/tickets/types', {
@@ -27,4 +25,3 @@ export async function createTicket(ticketTypeId, config) {
 
   return res.data;
 }
->>>>>>> Stashed changes

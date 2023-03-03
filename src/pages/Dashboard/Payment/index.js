@@ -1,9 +1,9 @@
+import { Typography } from '@material-ui/core';
+import { useState } from 'react';
+import ChooseTicket from '../../../components/Payment';
 import FinishPayment from './FinishPayment';
 
 export default function Payment() {
-<<<<<<< Updated upstream
-  return <FinishPayment />;
-=======
   const [showFinishPayment, setShowFinishPayment] = useState(false);
 
   return (
@@ -14,7 +14,7 @@ export default function Payment() {
       showFinishPayment={showFinishPayment}
       setShowFinishPayment={setShowFinishPayment}/>}
       {showFinishPayment && <FinishPayment />}
+      
     </>
   );
->>>>>>> Stashed changes
 }

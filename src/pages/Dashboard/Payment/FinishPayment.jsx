@@ -48,6 +48,9 @@ export default function FinishPayment() {
       }
     } finally {
       setLoading(false);
+
+      //REMOVER DEPOIS
+      setTicketData(true);
     }
   }
 
@@ -68,7 +71,6 @@ export default function FinishPayment() {
       {ticketData ? (
         <>
           <Container>
-            <Typography variant="h4">Ingresso e pagamento</Typography>
             <ChosenTicket ticketInfo={ticketData} />
             {showCard ? (
               <CreditCard setShowCard={setShowCard} ticketData={ticketData} />
@@ -84,10 +86,11 @@ export default function FinishPayment() {
             )}
           </Container>
         </>
-      ) : (<>
-        <Typography variant="h4" style={{ fontWeight: 700 }}>
-          Parece que você ainda não reservou nenhum ingresso =(
-        </Typography>
+      ) : (
+        <>
+          <Typography variant="h4" style={{ fontWeight: 700 }}>
+            Parece que você ainda não reservou nenhum ingresso =(
+          </Typography>
         </>
       )}
     </>
