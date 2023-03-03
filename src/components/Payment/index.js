@@ -7,7 +7,7 @@ import CardAcc from './cardTypeAccommodation';
 import ConfirmTicket from './ConfirmTicket';
 import useTicketsTypes from '../../hooks/api/useTicketsTypes';
 
-export default function ChooseTicket({showFinishPayment, setShowFinishPayment}) {
+export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }) {
   const { ticketsTypes } = useTicketsTypes();
   const [ types, setTypes ] = useState([]);
   const [ selectedType, setSelectedType ] = useState([]);
@@ -62,7 +62,6 @@ export default function ChooseTicket({showFinishPayment, setShowFinishPayment}) 
                     includesHotel={type.includesHotel}
                     selectedType={selectedType}
                     select={onSelectType}
-                    setTotal={setTotal}
                     type={type}
                   />
                 ))): 
@@ -121,21 +120,6 @@ export default function ChooseTicket({showFinishPayment, setShowFinishPayment}) 
 
 const StyledTypography = styled(Typography)`
   margin-bottom: 20px !important;
-`;
-
-const Caixa = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  width: 145px;
-  height: 145px;
-  border: 1px solid #cecece;
-  border-radius: 20px;
-  margin-right: 25px;
-  margin-top: 20px;
-  background: ${(props) => props.back};
 `;
 
 const Center = styled.div`
