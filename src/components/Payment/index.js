@@ -2,19 +2,45 @@ import useEnrollment from '../../hooks/api/useEnrollment';
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
+import Card from './cardTypeTicket';
+import CardAcc from './cardTypeAccommodation';
+import ConfirmTicket from './ConfirmTicket';
+import useTicketsTypes from '../../hooks/api/useTicketsTypes';
 
 export default function ChooseTicket() {
+  const { ticketsTypes } = useTicketsTypes();
+  const [ types, setTypes ] = useState([]);
+  const [ selectedType, setSelectedType ] = useState([]);
+  const [ selectedOptionHotel, setSelectedOptionHotel ] = useState([]);
+  const [ total, setTotal ] = useState(0);
   const { enrollment } = useEnrollment();
   const [withEnrollment, setWithEnrollmentt] = useState(false);
-  const [local, setLocal] = useState(250);
-  const [online, setOnline] = useState(100);
-  const [isRemote, setIsremote] = useState(false);
-  const [b1, setB1] = useState('#FFFFFF');
-  const [b2, setB2] = useState('#FFFFFF');
 
+  const onSelectType = (type) => {
+    if(selectedType[0]?.id === type?.id) {
+      setSelectedType([]);
+      setSelectedOptionHotel([]);
+      setTotal(0);
+      return;
+    }
+   
+    setSelectedType([type]);
+    setTotal(parseInt(type?.price));
+  };
+
+  const onSelectAcc = (id) => {
+    if(selectedOptionHotel[0] === id) {
+      setSelectedOptionHotel([]);
+      return;
+    }
+  
+    setSelectedOptionHotel([id]);
+  };
+ 
   useEffect(() => {
     if (enrollment) {
       setWithEnrollmentt(true);
+      setTypes(ticketsTypes);
     }
   }, [enrollment]);
 
@@ -22,33 +48,65 @@ export default function ChooseTicket() {
     <>
       {withEnrollment ? (
         <>
-          <Modalidade>
+          <Container>
             <P1>Primeiro, escolha sua modalidade de ingresso</P1>
             <Caixas>
-              <Caixa
-                back={b1}
-                onClick={() => {
-                  setIsremote(true);
-                  setB1('#FFEED2');
-                  setB2('#FFFFFF');
-                }}
-              >
-                <div>Presencial</div>
-                <Din>R$ {local}</Din>
-              </Caixa>
-              <Caixa
-                back={b2}
-                onClick={() => {
-                  setIsremote(false);
-                  setB1('#FFFFFF');
-                  setB2('#FFEED2');
-                }}
-              >
-                <div>Online</div>
-                <Din>R$ {online}</Din>
-              </Caixa>
+              {types?.length > 0 ? (
+                types.map((type) => (
+                  <Card
+                    key={type.id}
+                    id={type.id}
+                    name={type.name}
+                    price={type.price}
+                    isRemote={type.isRemote}
+                    includesHotel={type.includesHotel}
+                    selectedType={selectedType}
+                    select={onSelectType}
+                    setTotal={setTotal}
+                    type={type}
+                  />
+                ))): 
+                <P1>Ingressos não disponíveis ainda...</P1>
+              }
             </Caixas>
-          </Modalidade>
+          </Container>
+          <Container>
+            {selectedType?.length > 0 && selectedType[0].includesHotel ? (
+              <>
+                <P1>Ótimo! Agora escolha sua modalidade de hospedagem</P1>
+                <Caixas>
+                  <CardAcc
+                    key={1}
+                    id={1}
+                    price={0}
+                    name={'Sem Hotel'}
+                    selectedOptionHotel={selectedOptionHotel}
+                    select={onSelectAcc}
+                  />
+                  <CardAcc
+                    key={2}
+                    id={2}
+                    price={350}
+                    name={'Com Hotel'}
+                    selectedOptionHotel={selectedOptionHotel}
+                    select={onSelectAcc}
+                  />
+                </Caixas>
+              </>
+            ):(<></>)}
+            
+          </Container>
+          <Container>
+            {((selectedType?.length > 0 && 
+            selectedType[0].includesHotel && 
+            selectedOptionHotel?.length > 0) || 
+            (selectedType?.length > 0 && selectedType[0].isRemote)
+            ) ? (
+                <ConfirmTicket ticketTypeId={selectedType[0]?.id}
+                  value={total + (selectedOptionHotel[0] === 2 ? 350 : 0)} />
+              ):(<></>)}
+            
+          </Container>
         </>
       ) : (
         <Center>
@@ -87,11 +145,12 @@ const Center = styled.div`
   width: 378px;
 `;
 
-const Modalidade = styled.div`
+const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
+  margin-top: 17px;
 `;
 
 const Caixas = styled.div`
