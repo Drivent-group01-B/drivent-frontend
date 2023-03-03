@@ -1,6 +1,5 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
-import axios from 'axios';
 import UserContext from '../../contexts/UserContext';
 import { toast } from 'react-toastify';
 import { createTicket } from '../../services/ticketApi.js';
@@ -10,37 +9,35 @@ export default function ConfirmTicket({ ticketTypeId, value, showFinishPayment, 
   const config = { headers: { Authorization: `Bearer ${userData.token}` } };
 
   async function bookTicket() {
-
-    try{
+    try {
       const ticket = await createTicket(ticketTypeId, config);
-      if(ticket){
+      if (ticket) {
         setShowFinishPayment(!showFinishPayment);
         toast('Ticket reservado com sucesso!');
       }
-    } catch (error){
+    } catch (error) {
       toast('Erro inesperado!');
     }
-
   }
 
   return (
     <Container>
-      <p>Fechado! O total ficou em <strong>${value}</strong>. Agora é só confirmar:</p>
+      <p>
+        Fechado! O total ficou em <strong>${value}</strong>. Agora é só confirmar:
+      </p>
       <ConfirmButton onClick={() => bookTicket()}>RESERVAR INGRESSO</ConfirmButton>
     </Container>
   );
 }
 
 const Container = styled.div`
-    p{
-    font-family: 'Roboto', sans-serif;
-    font-weight: 400;
+  p {
     font-size: 20px;
     line-height: 23px;
     color: #8e8e8e;
     margin-top: 43px;
     margin-bottom: 20px;
-    }
+  }
 `;
 
 const ConfirmButton = styled.button`
@@ -50,8 +47,7 @@ const ConfirmButton = styled.button`
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
   border-radius: 4px;
   cursor: pointer;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
+
   font-size: 14px;
   line-height: 16px;
   text-align: center;

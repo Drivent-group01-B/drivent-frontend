@@ -1,45 +1,44 @@
 import useEnrollment from '../../hooks/api/useEnrollment';
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import Typography from '@material-ui/core/Typography';
 import Card from './cardTypeTicket';
 import CardAcc from './cardTypeAccommodation';
 import ConfirmTicket from './ConfirmTicket';
 import useTicketsTypes from '../../hooks/api/useTicketsTypes';
 
-export default function ChooseTicket({showFinishPayment, setShowFinishPayment}) {
+export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }) {
   const { ticketsTypes } = useTicketsTypes();
-  const [ types, setTypes ] = useState([]);
-  const [ selectedType, setSelectedType ] = useState([]);
-  const [ selectedOptionHotel, setSelectedOptionHotel ] = useState([]);
-  const [ total, setTotal ] = useState(0);
+  const [types, setTypes] = useState([]);
+  const [selectedType, setSelectedType] = useState([]);
+  const [selectedOptionHotel, setSelectedOptionHotel] = useState([]);
+  const [total, setTotal] = useState(0);
   const { enrollment } = useEnrollment();
-  const [withEnrollment, setWithEnrollmentt] = useState(false);
+  const [withEnrollment, setWithEnrollment] = useState(false);
 
   const onSelectType = (type) => {
-    if(selectedType[0]?.id === type?.id) {
+    if (selectedType[0]?.id === type?.id) {
       setSelectedType([]);
       setSelectedOptionHotel([]);
       setTotal(0);
       return;
     }
-   
+
     setSelectedType([type]);
     setTotal(parseInt(type?.price));
   };
 
   const onSelectAcc = (id) => {
-    if(selectedOptionHotel[0] === id) {
+    if (selectedOptionHotel[0] === id) {
       setSelectedOptionHotel([]);
       return;
     }
-  
+
     setSelectedOptionHotel([id]);
   };
- 
+
   useEffect(() => {
     if (enrollment) {
-      setWithEnrollmentt(true);
+      setWithEnrollment(true);
       setTypes(ticketsTypes);
     }
   }, [enrollment]);
@@ -65,9 +64,10 @@ export default function ChooseTicket({showFinishPayment, setShowFinishPayment}) 
                     setTotal={setTotal}
                     type={type}
                   />
-                ))): 
+                ))
+              ) : (
                 <P1>Ingressos não disponíveis ainda...</P1>
-              }
+              )}
             </Caixas>
           </Container>
           <Container>
@@ -93,21 +93,23 @@ export default function ChooseTicket({showFinishPayment, setShowFinishPayment}) 
                   />
                 </Caixas>
               </>
-            ):(<></>)}
-            
+            ) : (
+              <></>
+            )}
           </Container>
           <Container>
-            {((selectedType?.length > 0 && 
-            selectedType[0].includesHotel && 
-            selectedOptionHotel?.length > 0) || 
-            (selectedType?.length > 0 && selectedType[0].isRemote)
-            ) ? (
-                <ConfirmTicket ticketTypeId={selectedType[0]?.id}
-                  value={total + (selectedOptionHotel[0] === 2 ? 350 : 0)} 
-                  showFinishPayment={showFinishPayment}
-                  setShowFinishPayment={setShowFinishPayment}/>
-              ):(<></>)}
-            
+            {(selectedType?.length > 0 && selectedType[0].includesHotel && selectedOptionHotel?.length > 0) ||
+            (selectedType?.length > 0 && selectedType[0].isRemote) ? (
+              /* eslint-disable indent */
+              <ConfirmTicket
+                ticketTypeId={selectedType[0]?.id}
+                value={total + (selectedOptionHotel[0] === 2 ? 350 : 0)}
+                showFinishPayment={showFinishPayment}
+                setShowFinishPayment={setShowFinishPayment}
+              />
+            ) : (
+              <></>
+            )}
           </Container>
         </>
       ) : (
@@ -118,25 +120,6 @@ export default function ChooseTicket({showFinishPayment, setShowFinishPayment}) 
     </>
   );
 }
-
-const StyledTypography = styled(Typography)`
-  margin-bottom: 20px !important;
-`;
-
-const Caixa = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  width: 145px;
-  height: 145px;
-  border: 1px solid #cecece;
-  border-radius: 20px;
-  margin-right: 25px;
-  margin-top: 20px;
-  background: ${(props) => props.back};
-`;
 
 const Center = styled.div`
   display: flex;
@@ -168,23 +151,4 @@ const P1 = styled.div`
   line-height: 23px;
   text-align: center;
   color: #8e8e8e;
-`;
-
-const Din = styled.div`
-  font-weight: 100;
-  font-size: 14px;
-  line-height: 23px;
-  text-align: center;
-  color: #8e8e8e;
-`;
-
-const Confirmation = styled.div`
-  display: flex;
-  margin-top: 17px;
-  p {
-    margin-left: 14px;
-    font-style: normal;
-    font-size: 14px;
-    line-height: 19px;
-  }
 `;
