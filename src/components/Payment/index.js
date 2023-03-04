@@ -6,6 +6,7 @@ import Card from './cardTypeTicket';
 import CardAcc from './cardTypeAccommodation';
 import ConfirmTicket from './ConfirmTicket';
 import useTicketsTypes from '../../hooks/api/useTicketsTypes';
+import useTicket from '../../hooks/api/useTicket';
 
 export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }) {
   const { ticketsTypes } = useTicketsTypes();
@@ -15,6 +16,7 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }
   const [ total, setTotal ] = useState(0);
   const { enrollment } = useEnrollment();
   const [withEnrollment, setWithEnrollmentt] = useState(false);
+  const { ticket, ticketError } = useTicket();
 
   const onSelectType = (type) => {
     if(selectedType[0]?.id === type?.id) {
@@ -23,7 +25,6 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }
       setTotal(0);
       return;
     }
-   
     setSelectedType([type]);
     setTotal(parseInt(type?.price));
   };
@@ -34,15 +35,28 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }
       return;
     }
   
-    setSelectedOptionHotel([id]);
+    setSelectedOptionHotel([id]);  
+  };
+
+  const updateTotal = () => {
+    if(selectedOptionHotel[0] === 2) {
+      setTotal(parseInt(selectedType[0]?.price)+350);
+    }else {
+      setTotal(parseInt(selectedType[0]?.price));
+    }
   };
  
   useEffect(() => {
     if (enrollment) {
       setWithEnrollmentt(true);
+    }
+    if(ticketsTypes) {
       setTypes(ticketsTypes);
     }
-  }, [enrollment]);
+    if(ticket) {
+      console.log(ticket);
+    }
+  }, [enrollment, ticketsTypes, ticket]);
 
   return (
     <>
@@ -81,6 +95,7 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }
                     name={'Sem Hotel'}
                     selectedOptionHotel={selectedOptionHotel}
                     select={onSelectAcc}
+                    updateTotal={updateTotal}
                   />
                   <CardAcc
                     key={2}
@@ -89,6 +104,7 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }
                     name={'Com Hotel'}
                     selectedOptionHotel={selectedOptionHotel}
                     select={onSelectAcc}
+                    updateTotal={updateTotal}
                   />
                 </Caixas>
               </>
@@ -102,7 +118,7 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }
             (selectedType?.length > 0 && selectedType[0].isRemote)
             ) ? (
                 <ConfirmTicket ticketTypeId={selectedType[0]?.id}
-                  value={total + (selectedOptionHotel[0] === 2 ? 350 : 0)} 
+                  value={total} 
                   showFinishPayment={showFinishPayment}
                   setShowFinishPayment={setShowFinishPayment}/>
               ):(<></>)}

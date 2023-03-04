@@ -27,7 +27,7 @@ export default function FinishPayment() {
       await resolveAfter3Sec;
 
       const res = await getTicketByUserId(token);
-      setTicketData(res.data);
+      setTicketData(res);
     } catch (error) {
       const { response } = error;
       const notify = (message, type) =>
@@ -50,7 +50,7 @@ export default function FinishPayment() {
       setLoading(false);
 
       //REMOVER DEPOIS
-      setTicketData(true);
+      //setTicketData();
     }
   }
 

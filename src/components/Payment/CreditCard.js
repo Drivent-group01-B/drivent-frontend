@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Cards from 'react-credit-cards';
 
 import { formatCreditCardNumber, formatCVC, formatExpirationDate } from './utils';
@@ -8,13 +8,13 @@ import styled from 'styled-components';
 import axios from 'axios';
 import UserContext from '../../contexts/UserContext';
 import { toast } from 'react-toastify';
+import useTicket from '../../hooks/api/useTicket';
 
-export default function CreditCard({ ticketData, setShowCard }) {
-  ticketData = { id: 1, ticketType: 'Presencial', includesHotel: true, price: 600.0 };
-
+export default function CreditCard( { ticketData, setShowCard } ) {
   const { userData } = useContext(UserContext);
   const [state, setState] = useState({ number: '', name: '', expiry: '', cvc: '', issuer: '', focused: '' });
   const [form, setForm] = useState({ ticketId: '', value: '', cardIssuer: '', cardLastDigits: '' });
+
   function handleCallback({ issuer }, isValid) {
     if (isValid) {
       setState({ ...state, issuer: issuer });
@@ -39,9 +39,10 @@ export default function CreditCard({ ticketData, setShowCard }) {
 
   function handleSubmit(e) {
     e.preventDefault();
+    console.log(ticketData);
     setForm({
       ticketId: ticketData.id /*ticket.id*/,
-      value: ticketData.price /*ticket.TicketType.price*/,
+      value: ticketData.TicketType.price /*ticket.TicketType.price*/,
       cardData: {
         issuer: state.issuer,
         number: state.number,

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-export default function Card({ id, price, name, selectedOptionHotel, select }) {
+export default function Card({ id, price, name, selectedOptionHotel, select, updateTotal }) {
   const [ isSelected, setSelected ] = useState(false);
 
   useEffect(() => {
@@ -10,6 +10,7 @@ export default function Card({ id, price, name, selectedOptionHotel, select }) {
     }else{
       setSelected(false);
     }
+    updateTotal();
   }, [selectedOptionHotel]);
 
   return (
