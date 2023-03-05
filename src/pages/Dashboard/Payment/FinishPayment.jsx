@@ -71,8 +71,8 @@ export default function FinishPayment() {
       {ticketData ? (
         <>
           <Container>
-            <ChosenTicket ticketInfo={ticketData} />
-            {showCard ? (
+            <ChosenTicket ticketData={ticketData} />
+            {showCard && ticketData.status !== 'PAID' ? (
               <CreditCard setShowCard={setShowCard} ticketData={ticketData} />
             ) : (
               <Confirmation>

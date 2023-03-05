@@ -1,8 +1,15 @@
 import styled from 'styled-components';
 
 export default function ChosenTicket({ ticketData }) {
-  //APAGAR DEPOIS
-  ticketData = { ticketType: 'Presencial', includesHotel: true, price: 600.0 };
+  const calculateTotal = () => {
+    let total = 0;
+    if(ticketData.includedHotel) {
+      total = parseInt(ticketData.TicketType.price) + parseInt(ticketData.TicketType.hotelTax);
+    }else{
+      total = parseInt(+ticketData.TicketType.price);
+    }
+    return total;
+  };
 
   return (
     <>
@@ -11,9 +18,9 @@ export default function ChosenTicket({ ticketData }) {
         <TicketInfo>
           <div>
             <p className="info">
-              {`${ticketData.ticketType}`} {ticketData.includesHotel && ' + Com hotel'}
+              {`${ticketData.TicketType.isRemote ? 'Online' : 'Presencial'}`} {ticketData.includedHotel && ' + Com hotel'}
             </p>
-            <p className="price">{ticketData.price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</p>
+            <p className="price">{(calculateTotal()).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</p>
           </div>
         </TicketInfo>
       </Container>

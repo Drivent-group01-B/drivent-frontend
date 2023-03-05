@@ -20,8 +20,8 @@ export async function getTicketsTypes(token) {
   return res.data;
 }
 
-export async function createTicket(ticketTypeId, config) {
-  const res = await api.post('/tickets', { ticketTypeId }, config);
+export async function createTicket(ticket, config) {
+  const res = await api.post('/tickets', ticket, config);
 
   return res.data;
 }

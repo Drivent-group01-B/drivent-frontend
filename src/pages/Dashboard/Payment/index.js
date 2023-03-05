@@ -5,7 +5,6 @@ import FinishPayment from './FinishPayment';
 
 export default function Payment() {
   const [showFinishPayment, setShowFinishPayment] = useState(false);
-
   return (
     <>
       <Typography variant="h4">Ingresso e pagamento</Typography>
