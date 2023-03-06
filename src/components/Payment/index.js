@@ -8,7 +8,7 @@ import ConfirmTicket from './ConfirmTicket';
 import useTicketsTypes from '../../hooks/api/useTicketsTypes';
 import useTicket from '../../hooks/api/useTicket';
 
-export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }) {
+export default function ChooseTicket({ showFinishPayment, setShowFinishPayment, setValue }) {
   const { ticketsTypes } = useTicketsTypes();
   const [ types, setTypes ] = useState([]);
   const [ selectedType, setSelectedType ] = useState([]);
@@ -16,7 +16,8 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }
   const [ total, setTotal ] = useState(0);
   const { enrollment } = useEnrollment();
   const [withEnrollment, setWithEnrollmentt] = useState(false);
-  const { ticket, ticketError } = useTicket();
+  const { ticket, ticketError, ticketLoading } = useTicket();
+  const [ ticketData, setTicketData ] = useState();
 
   const onSelectType = (type) => {
     if(selectedType[0]?.id === type?.id) {
@@ -54,7 +55,16 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }
       setTypes(ticketsTypes);
     }
     if(ticket) {
-      console.log(ticket);
+      if(ticket.status === 'PAID') {
+        setShowFinishPayment(true);
+        return;
+      }
+      setTicketData(ticket);
+      setSelectedType([ticket.TicketType]);
+      if(!ticket.isRemote) {
+        setSelectedOptionHotel(ticket.includedHotel ? [2] : [1] );
+        setTotal(ticket.TicketType.price+ticket.TicketType.hotelTax);
+      }
     }
   }, [enrollment, ticketsTypes, ticket]);
 
@@ -118,7 +128,9 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment }
             (selectedType?.length > 0 && selectedType[0].isRemote)
             ) ? (
                 <ConfirmTicket ticketTypeId={selectedType[0]?.id}
-                  value={total} 
+                  ticketData={ticketData}
+                  value={total}
+                  includedHotel={selectedOptionHotel[0] === 2 ? true : false} 
                   showFinishPayment={showFinishPayment}
                   setShowFinishPayment={setShowFinishPayment}/>
               ):(<></>)}

@@ -39,10 +39,8 @@ export default function CreditCard( { ticketData, setShowCard } ) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log(ticketData);
     setForm({
       ticketId: ticketData.id /*ticket.id*/,
-      value: ticketData.TicketType.price /*ticket.TicketType.price*/,
       cardData: {
         issuer: state.issuer,
         number: state.number,

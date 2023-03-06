@@ -5,13 +5,19 @@ import UserContext from '../../contexts/UserContext';
 import { toast } from 'react-toastify';
 import { createTicket } from '../../services/ticketApi.js';
 
-export default function ConfirmTicket({ ticketTypeId, value, showFinishPayment, setShowFinishPayment }) {
+export default function ConfirmTicket({ ticketData, ticketTypeId, includedHotel, value, showFinishPayment, setShowFinishPayment }) {
   const { userData } = useContext(UserContext);
   const config = { headers: { Authorization: `Bearer ${userData.token}` } };
 
   async function bookTicket() {
+    let newTicket = {};
+    if(ticketData) {
+      delete ticketData.TicketType;
+      newTicket = { ...ticketData };
+    }
+    newTicket = { ...newTicket, ticketTypeId, includedHotel };
     try {
-      const ticket = await createTicket(ticketTypeId, config);
+      const ticket = await createTicket(newTicket, config);
       if(ticket) {
         setShowFinishPayment(!showFinishPayment);
         toast('Ticket reservado com sucesso!');
