@@ -3,24 +3,30 @@ import { useEffect, useState } from 'react';
 import { Typography } from '@material-ui/core';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
-import * as Ai from 'react-icons/ai';
 import Loader from 'react-loader-spinner';
 
-import ChosenTicket from '../../../components/Payment/ChosenTicket';
-import CreditCard from '../../../components/Payment/CreditCard';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+
 import useToken from '../../../hooks/useToken';
 import { getTicketByUserId } from '../../../services/ticketApi';
+import StripeCheckout from '../../../components/Payment/StripeChekout';
+import { createPaymentIntent } from '../../../services/paymentsApi';
+
+const promise = loadStripe(
+  'pk_test_51MhIOvDP6lzKO7ie5pdvUVVL1nvf4XEhqGoX3vmsk8Vm5EXuzTle8LDqrrvobK5BthrHtIXmvRMglY666tWBi0cV006MheWUPD'
+);
 
 export default function FinishPayment() {
   const token = useToken();
 
   const [ticketData, setTicketData] = useState(null);
-  const [showCard, setShowCard] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [clientSecret, setClientSecret] = useState(null);
 
   async function fetchTicketData() {
     //simula busca no backend
-    const resolveAfter3Sec = new Promise((resolve) => setTimeout(resolve, 3000));
+    const resolveAfter3Sec = new Promise((resolve) => setTimeout(resolve, 300));
 
     try {
       //aguarda simulaçao
@@ -48,14 +54,21 @@ export default function FinishPayment() {
       }
     } finally {
       setLoading(false);
+    }
+  }
 
-      //REMOVER DEPOIS
-      setTicketData(true);
+  async function fetchPaymentSecret() {
+    try {
+      const res = await createPaymentIntent(token, 200);
+      setClientSecret(res.clientSecret);
+    } catch (error) {
+      toast.error('Erro inesperado!');
     }
   }
 
   useEffect(() => {
-    fetchTicketData();
+    // fetchTicketData();
+    fetchPaymentSecret();
   }, []);
 
   if (loading) {
@@ -68,21 +81,14 @@ export default function FinishPayment() {
 
   return (
     <>
-      {ticketData ? (
+      {!ticketData ? (
         <>
           <Container>
-            <ChosenTicket ticketInfo={ticketData} />
-            {showCard ? (
-              <CreditCard setShowCard={setShowCard} ticketData={ticketData} />
-            ) : (
-              <Confirmation>
-                <Ai.AiFillCheckCircle size={41} color="#36B853" />
-                <p>
-                  <strong>Pagamento confirmado!</strong>
-                  <br />
-                  Prossiga para escolha de hospedagem e atividades
-                </p>
-              </Confirmation>
+            {/* <ChosenTicket ticketInfo={ticketData} /> */}
+            {clientSecret && (
+              <Elements stripe={promise} options={{ clientSecret: clientSecret }}>
+                <StripeCheckout />
+              </Elements>
             )}
           </Container>
         </>

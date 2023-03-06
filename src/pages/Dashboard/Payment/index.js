@@ -4,7 +4,7 @@ import ChooseTicket from '../../../components/Payment';
 import FinishPayment from './FinishPayment';
 
 export default function Payment() {
-  const [showFinishPayment, setShowFinishPayment] = useState(false);
+  const [showFinishPayment, setShowFinishPayment] = useState(true);
 
   return (
     <>
