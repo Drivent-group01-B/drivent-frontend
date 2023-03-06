@@ -7,12 +7,11 @@ import styled from 'styled-components';
 //PAYMENT FAILED 4000000000009995
 //NEED AUTH 4000002500003155
 
-export default function CheckoutForm() {
+export default function CheckoutForm({ setConfirmPayment }) {
   const stripe = useStripe();
   const elements = useElements();
 
   const [error, setError] = useState(null);
-  const [confirmPayment, setConfirmPayment] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -21,32 +20,30 @@ export default function CheckoutForm() {
       return <>Carregando</>;
     }
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `http://${window.location.host}/dashboard/payment`,
-      },
-      redirect: 'if_required',
-    });
+    try {
+      await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `http://${window.location.host}/dashboard/payment`,
+        },
+        redirect: 'if_required',
+      });
 
-    if (error) {
-      setError(error.message);
-    } else {
       setConfirmPayment(true);
+    } catch (error) {
+      setError(error.message);
     }
   }
 
   return (
     <>
-      {confirmPayment ? (
-        <p>Pagamento finalizado</p>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <PaymentElement />
-          <SendButton disabled={!stripe}>FINALIZAR PAGAMENTO</SendButton>
-          {error && <div>{error}</div>}
-        </form>
-      )}
+      <p className="title">Pagamento</p>
+
+      <form onSubmit={handleSubmit}>
+        <PaymentElement />
+        <SendButton disabled={!stripe}>FINALIZAR PAGAMENTO</SendButton>
+        {error && <div>{error}</div>}
+      </form>
     </>
   );
 }
@@ -60,7 +57,6 @@ const SendButton = styled.button`
   cursor: pointer;
 
   font-size: 14px;
-  line-height: 16px;
   text-align: center;
 
   margin-top: 54px;

@@ -1,20 +1,21 @@
 import styled from 'styled-components';
 
 export default function ChosenTicket({ ticketData }) {
-  //APAGAR DEPOIS
-  ticketData = { ticketType: 'Presencial', includesHotel: true, price: 600.0 };
-
   return (
     <>
       <Container>
         <p className="title">Ingresso escolhido</p>
         <TicketInfo>
-          <div>
-            <p className="info">
-              {`${ticketData.ticketType}`} {ticketData.includesHotel && ' + Com hotel'}
-            </p>
-            <p className="price">{ticketData.price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</p>
-          </div>
+          {ticketData && (
+            <div>
+              <p className="info">
+                {`${ticketData.TicketType.name}`} {ticketData.TicketType.includesHotel && ' + Com hotel'}
+              </p>
+              <p className="price">
+                {ticketData.TicketType.price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}
+              </p>
+            </div>
+          )}
         </TicketInfo>
       </Container>
     </>
