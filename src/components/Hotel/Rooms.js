@@ -4,15 +4,16 @@ import styled from 'styled-components';
 
 import * as Bs from 'react-icons/bs';
 
-import { getHotelsWithRooms } from '../../services/hotelApi';
+import { getHotelRoomsWithDetails } from '../../services/hotelApi';
 
 export default function Rooms({ token, hotelId }) {
-  const [hotelsWithRooms, setHotelsWithRooms] = useState(null);
+  const [rooms, setRooms] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
   async function fetchHotelWithRoomsData() {
     try {
-      const response = await getHotelsWithRooms(token, hotelId);
-      setHotelsWithRooms(response);
+      const response = await getHotelRoomsWithDetails(token, hotelId);
+      setRooms(response);
     } catch (error) {
       toast.error('Erro inesperado!', error.message);
     }
@@ -24,13 +25,21 @@ export default function Rooms({ token, hotelId }) {
 
   return (
     <RoomsContainer>
-      {hotelsWithRooms &&
-        hotelsWithRooms.Rooms.map((room) => (
-          <Room key={room.id}>
+      {rooms &&
+        rooms.rooms.map((room) => (
+          <Room
+            key={room.id}
+            isFull={room.capacity === room._count.Booking}
+            selected={room.id === selectedRoom}
+            onClick={() => setSelectedRoom(room.id)}
+          >
             <p className="room-name">{room.name}</p>
             <div className="capacity">
-              {Array.from({ length: room.capacity }).map((_, i) => (
+              {Array.from({ length: room.capacity - room._count.Booking }).map((_, i) => (
                 <Bs.BsPerson key={i} size="20px" />
+              ))}
+              {Array.from({ length: room._count.Booking }).map((_, i) => (
+                <Bs.BsPersonFill key={i} size="20px" />
               ))}
             </div>
           </Room>
@@ -51,6 +60,11 @@ const Room = styled.div`
   width: 190px;
   padding: 10px 16px;
 
+  background: ${({ isFull }) => (isFull ? '#E9E9E9' : '#fff')};
+  color: ${({ isFull }) => (isFull ? '#8C8C8C' : '#454545')};
+
+  background: ${({ selected }) => selected && '#FFEED2'};
+
   border: 1px solid #cecece;
   border-radius: 10px;
 
@@ -58,7 +72,7 @@ const Room = styled.div`
   justify-content: space-between;
   align-items: center;
 
-  color: '#454545';
+  transition: all 500ms ease;
 
   &:hover {
     cursor: pointer;
