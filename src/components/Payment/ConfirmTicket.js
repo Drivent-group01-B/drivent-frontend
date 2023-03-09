@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
-import axios from 'axios';
 import UserContext from '../../contexts/UserContext';
 import { toast } from 'react-toastify';
 import { createTicket } from '../../services/ticketApi.js';

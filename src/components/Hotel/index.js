@@ -1,15 +1,24 @@
-import { useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
+import UserContext from '../../contexts/UserContext';
 import useHotels from '../../hooks/api/useHotels';
 import CardHotel from './CardHotel';
+import { getTicketByUserId } from '../../services/ticketApi';
 
 export default function ChooseTicket({ showBooking, setShowBooking }) {
+  const { userData } = useContext(UserContext);
   const { hotels } = useHotels();
   const [hotelsData, setHotelsData] = useState([]);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [includeHotel, setIncludeHotel] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState("RESERVED");
+
+  useEffect(async () => {
+    const ticket = await getTicketByUserId(userData.token);
+    setIncludeHotel(ticket.includedHotel);
+    setPaymentStatus(ticket.status);
+  }, []);
 
   useEffect(() => {
     if (hotels && hotels?.length > 0) {
@@ -148,5 +157,4 @@ const ErrorContainer = styled.div`
 
       color: #8E8E8E;
   }
-
 `;
