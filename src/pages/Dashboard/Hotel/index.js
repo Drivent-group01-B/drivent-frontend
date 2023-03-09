@@ -2,11 +2,11 @@ import { Typography } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
-import * as Bs from 'react-icons/bs';
 
 import useTicket from '../../../hooks/api/useTicket';
 import useToken from '../../../hooks/useToken';
-import { getHotels, getHotelsWithRooms } from '../../../services/hotelApi';
+import { getHotels } from '../../../services/hotelApi';
+import Rooms from '../../../components/Hotel/Rooms';
 
 export default function Hotel() {
   const { ticket } = useTicket();
@@ -14,7 +14,6 @@ export default function Hotel() {
 
   const [hotels, setHotels] = useState(null);
   const [loadingHotels, setLoadingHotels] = useState(true);
-  const [hotelsWithRooms, setHotelsWithRooms] = useState(null);
 
   async function fetchHotelsData() {
     try {
@@ -26,26 +25,18 @@ export default function Hotel() {
     }
   }
 
-  async function fetchHotelWithRoomsData() {
-    try {
-      const response = await getHotelsWithRooms(token, hotels[0].id);
-      setHotelsWithRooms(response);
-    } catch (error) {
-      toast.error('Erro inesperado!', error.message);
-    }
-  }
-
   useEffect(() => {
     fetchHotelsData();
   }, []);
 
-  useEffect(() => {
-    fetchHotelWithRoomsData();
-  }, [loadingHotels]);
-
   if (!ticket) {
     return <>Sem ingresso ainda</>;
   }
+
+  if (loadingHotels) {
+    return <>Carregando...</>;
+  }
+
   return (
     <Container>
       <Typography variant="h4">Escolha de hotel e quarto</Typography>
@@ -59,19 +50,7 @@ export default function Hotel() {
           ))}
       </div>
       <p className="section-title">Ótima pedida! Agora escolha seu quarto:</p>
-      <RoomsContainer>
-        {hotelsWithRooms &&
-          hotelsWithRooms.Rooms.map((room) => (
-            <Room key={room.id}>
-              <p className="room-name">{room.name}</p>
-              <div className="capacity">
-                {Array.from({ length: room.capacity }).map((_, i) => (
-                  <Bs.BsPerson key={i} size="20px" />
-                ))}
-              </div>
-            </Room>
-          ))}
-      </RoomsContainer>
+      {hotels && <Rooms token={token} hotelId={hotels[0].id} />}
     </Container>
   );
 }
@@ -93,46 +72,6 @@ const HotelCard = styled.div`
     width: 100%;
     object-fit: cover;
     border-radius: 5px;
-  }
-`;
-
-const RoomsContainer = styled.div`
-  display: flex;
-  row-gap: 8px;
-  column-gap: 17px;
-
-  flex-wrap: wrap;
-`;
-
-const Room = styled.div`
-  width: 190px;
-  padding: 10px 16px;
-
-  border: 1px solid #cecece;
-  border-radius: 10px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  color: '#454545';
-
-  &:hover {
-    cursor: pointer;
-  }
-
-  .room-name {
-    font-size: 20px;
-    line-height: 23px;
-    font-weight: 700;
-
-    margin-right: 6px;
-  }
-
-  .capacity {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
   }
 `;
 
