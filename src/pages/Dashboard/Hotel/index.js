@@ -7,6 +7,8 @@ import useTicket from '../../../hooks/api/useTicket';
 import useToken from '../../../hooks/useToken';
 import { getHotels } from '../../../services/hotelApi';
 import Rooms from '../../../components/Hotel/Rooms';
+import ConfirmationButton from '../../../components/ConfirmationButton';
+import { bookRoomById } from '../../../services/bookingApi';
 
 export default function Hotel() {
   const { ticket } = useTicket();
@@ -14,6 +16,7 @@ export default function Hotel() {
 
   const [hotels, setHotels] = useState(null);
   const [loadingHotels, setLoadingHotels] = useState(true);
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
   async function fetchHotelsData() {
     try {
@@ -22,6 +25,16 @@ export default function Hotel() {
       setLoadingHotels(false);
     } catch (error) {
       toast.error('Erro inesperado!', error.message);
+    }
+  }
+
+  async function createBookingRoom() {
+    try {
+      await bookRoomById(token, selectedRoom);
+      toast('Reservado!');
+    } catch (error) {
+      console.log(error);
+      toast.error('Erro inesperado!');
     }
   }
 
@@ -40,40 +53,14 @@ export default function Hotel() {
   return (
     <Container>
       <Typography variant="h4">Escolha de hotel e quarto</Typography>
-      <div style={{ display: 'flex', gap: '20px' }}>
-        {hotels &&
-          hotels.map((hotel) => (
-            <HotelCard key={hotel.id}>
-              <img src={hotel.image} alt="hotel" />
-              <p className="name">{hotel.name}</p>
-            </HotelCard>
-          ))}
-      </div>
       <p className="section-title">Ótima pedida! Agora escolha seu quarto:</p>
-      {hotels && <Rooms token={token} hotelId={hotels[0].id} />}
+      {hotels && (
+        <Rooms token={token} hotelId={hotels[0].id} selectedRoom={selectedRoom} setSelectedRoom={setSelectedRoom} />
+      )}
+      <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
     </Container>
   );
 }
-
-const HotelCard = styled.div`
-  width: 196px;
-  height: 264px;
-  padding: 14px;
-
-  background: #ebebeb;
-  border-radius: 10px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-
-  img {
-    height: 109px;
-    width: 100%;
-    object-fit: cover;
-    border-radius: 5px;
-  }
-`;
 
 const Container = styled.div`
   font-family: 'Roboto';

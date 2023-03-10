@@ -6,9 +6,8 @@ import * as Bs from 'react-icons/bs';
 
 import { getHotelRoomsWithDetails } from '../../services/hotelApi';
 
-export default function Rooms({ token, hotelId }) {
+export default function Rooms({ token, hotelId, selectedRoom, setSelectedRoom }) {
   const [rooms, setRooms] = useState(null);
-  const [selectedRoom, setSelectedRoom] = useState(null);
 
   async function fetchHotelWithRoomsData() {
     try {
@@ -27,8 +26,8 @@ export default function Rooms({ token, hotelId }) {
     <RoomsContainer>
       {rooms &&
         rooms.rooms.map((room) => {
-          // room._count.Booking = 2;
-
+          room._count.Booking = 1;
+          // room.capacity = Math.floor(Math.random());
           const occupied = room._count.Booking;
           const available = room.capacity - occupied;
 
@@ -43,7 +42,7 @@ export default function Rooms({ token, hotelId }) {
               <div className="capacity">
                 {Array.from({ length: room.capacity }).map((_, i) => {
                   if (i < available) {
-                    return <Bs.BsPerson size="20px" />;
+                    return <Bs.BsPerson key={i} size="20px" />;
                   }
 
                   return <Bs.BsPersonFill key={i} size="20px" />;
@@ -85,6 +84,7 @@ const Room = styled.div`
 
   &:hover {
     cursor: pointer;
+    filter: brightness(0.97);
   }
 
   .room-name {
@@ -101,7 +101,7 @@ const Room = styled.div`
     flex-wrap: wrap;
   }
 
-  .bs-person:last-of-type {
+  .capacity svg:first-of-type {
     color: ${({ selected }) => selected && 'red'};
   }
 `;
