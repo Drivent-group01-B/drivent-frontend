@@ -26,24 +26,32 @@ export default function Rooms({ token, hotelId }) {
   return (
     <RoomsContainer>
       {rooms &&
-        rooms.rooms.map((room) => (
-          <Room
-            key={room.id}
-            isFull={room.capacity === room._count.Booking}
-            selected={room.id === selectedRoom}
-            onClick={() => setSelectedRoom(room.id)}
-          >
-            <p className="room-name">{room.name}</p>
-            <div className="capacity">
-              {Array.from({ length: room.capacity - room._count.Booking }).map((_, i) => (
-                <Bs.BsPerson key={i} size="20px" />
-              ))}
-              {Array.from({ length: room._count.Booking }).map((_, i) => (
-                <Bs.BsPersonFill key={i} size="20px" />
-              ))}
-            </div>
-          </Room>
-        ))}
+        rooms.rooms.map((room) => {
+          // room._count.Booking = 2;
+
+          const occupied = room._count.Booking;
+          const available = room.capacity - occupied;
+
+          return (
+            <Room
+              key={room.id}
+              isFull={available <= 0}
+              selected={room.id === selectedRoom}
+              onClick={() => setSelectedRoom(room.id)}
+            >
+              <p className="room-name">{room.name}</p>
+              <div className="capacity">
+                {Array.from({ length: room.capacity }).map((_, i) => {
+                  if (i < available) {
+                    return <Bs.BsPerson size="20px" />;
+                  }
+
+                  return <Bs.BsPersonFill key={i} size="20px" />;
+                })}
+              </div>
+            </Room>
+          );
+        })}
     </RoomsContainer>
   );
 }
@@ -63,6 +71,9 @@ const Room = styled.div`
   background: ${({ isFull }) => (isFull ? '#E9E9E9' : '#fff')};
   color: ${({ isFull }) => (isFull ? '#8C8C8C' : '#454545')};
 
+  cursor: ${({ isFull }) => isFull && 'not-allowed'};
+  pointer-events: ${({ isFull }) => isFull && 'none'};
+
   background: ${({ selected }) => selected && '#FFEED2'};
 
   border: 1px solid #cecece;
@@ -71,8 +82,6 @@ const Room = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  transition: all 500ms ease;
 
   &:hover {
     cursor: pointer;
@@ -90,5 +99,9 @@ const Room = styled.div`
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
+  }
+
+  .bs-person:last-of-type {
+    color: ${({ selected }) => selected && 'red'};
   }
 `;
