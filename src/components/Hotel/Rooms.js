@@ -27,7 +27,6 @@ export default function Rooms({ token, hotelId, selectedRoom, setSelectedRoom })
       {rooms &&
         rooms.rooms.map((room) => {
           room._count.Booking = 1;
-          // room.capacity = Math.floor(Math.random());
           const occupied = room._count.Booking;
           const available = room.capacity - occupied;
 
@@ -42,9 +41,11 @@ export default function Rooms({ token, hotelId, selectedRoom, setSelectedRoom })
               <div className="capacity">
                 {Array.from({ length: room.capacity }).map((_, i) => {
                   if (i < available) {
+                    if (selectedRoom === room.id && i === available - 1) {
+                      return <Bs.BsPersonFill key={i} color="#FF4791" size="20px" />;
+                    }
                     return <Bs.BsPerson key={i} size="20px" />;
                   }
-
                   return <Bs.BsPersonFill key={i} size="20px" />;
                 })}
               </div>
@@ -99,9 +100,5 @@ const Room = styled.div`
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
-  }
-
-  .capacity svg:first-of-type {
-    color: ${({ selected }) => selected && 'red'};
   }
 `;
