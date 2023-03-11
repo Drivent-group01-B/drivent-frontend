@@ -63,7 +63,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
 
   async function createBookingRoom() {
     try {
-      await bookRoomById(token, selectedRoom);
+      await bookRoomById(token, selectedRoom.id);
       toast('Reservado!');
     } catch (error) {
       toast.error('Erro inesperado!');
