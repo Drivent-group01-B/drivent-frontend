@@ -1,27 +1,8 @@
-import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 import styled from 'styled-components';
 
 import * as Bs from 'react-icons/bs';
 
-import { getHotelRoomsWithDetails } from '../../services/hotelApi';
-
-export default function Rooms({ token, hotelId, selectedRoom, setSelectedRoom }) {
-  const [rooms, setRooms] = useState(null);
-
-  async function fetchHotelWithRoomsData() {
-    try {
-      const response = await getHotelRoomsWithDetails(token, hotelId);
-      setRooms(response);
-    } catch (error) {
-      toast.error('Erro inesperado!', error.message);
-    }
-  }
-
-  useEffect(() => {
-    fetchHotelWithRoomsData();
-  }, []);
-
+export default function Rooms({ selectedRoom, setSelectedRoom, rooms }) {
   return (
     <RoomsContainer>
       {rooms &&
