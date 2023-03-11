@@ -26,7 +26,6 @@ export default function Rooms({ token, hotelId, selectedRoom, setSelectedRoom })
     <RoomsContainer>
       {rooms &&
         rooms.rooms.map((room) => {
-          room._count.Booking = 1;
           const occupied = room._count.Booking;
           const available = room.capacity - occupied;
 
