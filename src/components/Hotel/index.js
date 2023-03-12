@@ -1,5 +1,5 @@
 /* eslint-disable space-before-function-paren */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import useHotels from '../../hooks/api/useHotels';
@@ -8,11 +8,12 @@ import { getTicketByUserId } from '../../services/ticketApi';
 import useToken from '../../hooks/useToken';
 import Rooms from './Rooms';
 import { toast } from 'react-toastify';
-import { bookRoomById } from '../../services/bookingApi';
+import { bookRoomById, updateRoomById } from '../../services/bookingApi';
 import ConfirmationButton from '../../components/ConfirmationButton';
 import { getHotelRoomsWithDetails, getHotels } from '../../services/hotelApi';
+import UserContext from '../../contexts/UserContext';
 
-export default function ChooseTicket({ showBooking, setShowBooking }) {
+export default function ChooseTicket({ showBooking, setShowBooking, updateRoom }) {
   const token = useToken();
   const { hotels } = useHotels();
 
@@ -22,6 +23,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
   const [paymentStatus, setPaymentStatus] = useState('RESERVED');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
+  const { setUserData, userData } = useContext(UserContext);
 
   useEffect(async () => {
     const ticket = await getTicketByUserId(token);
@@ -63,8 +65,21 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
 
   async function createBookingRoom() {
     try {
-      await bookRoomById(token, selectedRoom.id);
+      const res = await bookRoomById(token, selectedRoom);
+      setShowBooking(true);
+      setUserData({ ...userData, bookingId: res.bookingId });
       toast('Reservado!');
+    } catch (error) {
+      toast.error('Erro inesperado!');
+    }
+  }
+
+  async function updateBooking() {
+    try {
+      const res = await updateRoomById(token, selectedRoom, userData.bookingId);
+      setShowBooking(true);
+      setUserData({ ...userData, bookingId: res.bookingId });
+      toast('Quarto alterado com sucesso!');
     } catch (error) {
       toast.error('Erro inesperado!');
     }
@@ -105,7 +120,11 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
           <Container>
             <StyledTypography variant="h6">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
             {hotels && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
-            <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
+            {!updateRoom ?
+              <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
+              :
+              <ConfirmationButton onClick={updateBooking}>TROCAR DE QUARTO</ConfirmationButton>
+            }
           </Container>
         ) : (
           <></>

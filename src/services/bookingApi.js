@@ -10,3 +10,14 @@ export async function bookRoomById(token, roomId) {
 
   return res.data;
 }
+
+export async function updateRoomById(token, roomId, bookingId) {
+  const body = { roomId: roomId };
+  const res = await api.put(`/booking/${bookingId}`, body, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+}
