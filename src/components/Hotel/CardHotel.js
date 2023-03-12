@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 export default function CardHotel({ hotel, select, selectedHotel }) {
-  const [ isSelected, setSelected ] = useState(false);
+  const [isSelected, setSelected] = useState(false);
 
   useEffect(() => {
-    if(selectedHotel) {
-      if(selectedHotel === hotel) {
+    if (selectedHotel) {
+      if (selectedHotel === hotel) {
         setSelected(true);
-      }else{
+      } else {
         setSelected(false);
       }
       return;
@@ -23,21 +23,21 @@ export default function CardHotel({ hotel, select, selectedHotel }) {
 
     let result = '';
 
-    if(includesSingle) {
+    if (includesSingle) {
       result += 'Single';
       result += includesDouble && includesTriple ? ', Double e Triple' : '';
       result += includesDouble ? ' e Double' : '';
       result += includesTriple ? ' e Triple' : '';
       return result;
-    };
-    if(includesDouble) {
+    }
+    if (includesDouble) {
       result += 'Double';
       result += includesTriple ? ' e Triple' : '';
       return result;
-    };
-    if(includesTriple) {
+    }
+    if (includesTriple) {
       result += 'Triple';
-    };
+    }
 
     return result;
   };
@@ -45,12 +45,12 @@ export default function CardHotel({ hotel, select, selectedHotel }) {
   const getVacancy = () => {
     const vacanciesCount = hotel?.Rooms.reduce((sum, item) => sum + parseInt(item.capacity), 0);
     return vacanciesCount;
-  }; 
+  };
 
   return (
     <>
-      <Card back={isSelected} onClick={() => select(hotel)}> 
-        <Image url={hotel.image} />       
+      <Card back={isSelected} onClick={() => select(hotel)}>
+        <Image url={hotel.image} />
         <Title>{hotel.name}</Title>
         <ContainerText>
           <strong>Tipos de acomodação: </strong>
@@ -75,8 +75,7 @@ const Card = styled.div`
   height: 264px;
   border-radius: 10px;
   margin-right: 25px;
-  margin-top: 15px;
-  background: ${(props) => props.back ? '#FFEED2' : '#EBEBEB'};
+  background: ${(props) => (props.back ? '#FFEED2' : '#EBEBEB')};
   cursor: pointer;
 `;
 
@@ -104,4 +103,3 @@ const ContainerText = styled.div`
   line-height: 14px;
   color: #3c3c3c;
 `;
-

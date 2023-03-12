@@ -1,23 +1,30 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import UserContext from '../../contexts/UserContext';
 import { toast } from 'react-toastify';
 import { createTicket } from '../../services/ticketApi.js';
 
-export default function ConfirmTicket({ ticketData, ticketTypeId, includedHotel, value, showFinishPayment, setShowFinishPayment }) {
+export default function ConfirmTicket({
+  ticketData,
+  ticketTypeId,
+  includedHotel,
+  value,
+  showFinishPayment,
+  setShowFinishPayment,
+}) {
   const { userData } = useContext(UserContext);
   const config = { headers: { Authorization: `Bearer ${userData.token}` } };
 
   async function bookTicket() {
     let newTicket = {};
-    if(ticketData) {
+    if (ticketData) {
       delete ticketData.TicketType;
       newTicket = { ...ticketData };
     }
     newTicket = { ...newTicket, ticketTypeId, includedHotel };
     try {
       const ticket = await createTicket(newTicket, config);
-      if(ticket) {
+      if (ticket) {
         setShowFinishPayment(!showFinishPayment);
         toast('Ticket reservado com sucesso!');
       }
@@ -28,14 +35,16 @@ export default function ConfirmTicket({ ticketData, ticketTypeId, includedHotel,
 
   return (
     <Container>
-      <p>Fechado! O total ficou em <strong>R${value}</strong>. Agora é só confirmar:</p>
+      <p>
+        Fechado! O total ficou em <strong>R${value}</strong>. Agora é só confirmar:
+      </p>
       <ConfirmButton onClick={() => bookTicket()}>RESERVAR INGRESSO</ConfirmButton>
     </Container>
   );
 }
 
 const Container = styled.div`
-    p{
+  p {
     font-family: 'Roboto', sans-serif;
     font-weight: 400;
     font-size: 20px;
@@ -43,7 +52,7 @@ const Container = styled.div`
     color: #8e8e8e;
     margin-top: 43px;
     margin-bottom: 20px;
-    }
+  }
 `;
 
 const ConfirmButton = styled.button`

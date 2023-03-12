@@ -1,84 +1,115 @@
-import React, { useContext, useState, useEffect } from 'react';
+/* eslint-disable space-before-function-paren */
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
-import UserContext from '../../contexts/UserContext';
 import useHotels from '../../hooks/api/useHotels';
 import CardHotel from './CardHotel';
 import { getTicketByUserId } from '../../services/ticketApi';
+import useToken from '../../hooks/useToken';
+import Rooms from './Rooms';
+import { toast } from 'react-toastify';
+import { bookRoomById } from '../../services/bookingApi';
+import ConfirmationButton from '../../components/ConfirmationButton';
+import { getHotelRoomsWithDetails, getHotels } from '../../services/hotelApi';
 
 export default function ChooseTicket({ showBooking, setShowBooking }) {
-  const { userData } = useContext(UserContext);
+  const token = useToken();
   const { hotels } = useHotels();
-  const [hotelsData, setHotelsData] = useState([]);
+
+  const [hotelsData, setHotelsData] = useState(null);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [includeHotel, setIncludeHotel] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState("RESERVED");
+  const [paymentStatus, setPaymentStatus] = useState('RESERVED');
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [rooms, setRooms] = useState(null);
 
   useEffect(async () => {
-    const ticket = await getTicketByUserId(userData.token);
+    const ticket = await getTicketByUserId(token);
     setIncludeHotel(ticket.includedHotel);
     setPaymentStatus(ticket.status);
-  }, []);
 
-  useEffect(() => {
-    if (hotels && hotels?.length > 0) {
-      setHotelsData(hotels);
+    if (ticket) {
+      fetchHotelsData();
     }
-    console.log(hotels);
-  }, [hotels]);
+  }, []);
 
   const onSelectHotel = (hotel) => {
     if (selectedHotel === hotel) {
       setSelectedHotel(null);
       return;
     }
+
+    fetchHotelWithRoomsData(hotel.id);
     setSelectedHotel(hotel);
   };
 
+  async function fetchHotelWithRoomsData(hotelId) {
+    try {
+      const response = await getHotelRoomsWithDetails(token, hotelId);
+      setRooms(response);
+    } catch (error) {
+      toast.error('Erro inesperado!', error.message);
+    }
+  }
+
+  async function fetchHotelsData() {
+    try {
+      const response = await getHotels(token);
+      setHotelsData(response);
+    } catch (error) {
+      toast.error('Erro inesperado!', error.message);
+    }
+  }
+
+  async function createBookingRoom() {
+    try {
+      await bookRoomById(token, selectedRoom.id);
+      toast('Reservado!');
+    } catch (error) {
+      toast.error('Erro inesperado!');
+    }
+  }
 
   if (!includeHotel) {
     return (
       <ErrorContainer>
-        <h1>Sua modalidade de ingresso não inclui  hospedagem<br></br>
-          Prossiga para a escolha de atividades</h1>
+        <h1>
+          Sua modalidade de ingresso não inclui hospedagem<br></br>
+          Prossiga para a escolha de atividades
+        </h1>
       </ErrorContainer>
     );
-  }
-
-  else if (paymentStatus === "RESERVED") {
+  } else if (paymentStatus === 'RESERVED') {
     return (
       <ErrorContainer>
-        <h1>Você precisa ter confirmado pagamento antes
-          de fazer a escolha de hospedagem</h1>
+        <h1>Você precisa ter confirmado pagamento antes de fazer a escolha de hospedagem</h1>
       </ErrorContainer>
-
     );
-  }
-
-  else {
+  } else {
     return (
       <>
-        {hotelsData?.length > 0 ? (
+        {hotelsData ? (
           <Container>
             <StyledTypography variant="h6">Primeiro, escolha o seu hotel</StyledTypography>
             <Cards>
               {hotelsData.map((item) => (
-                <CardHotel
-                  hotel={item}
-                  select={onSelectHotel}
-                  selectedHotel={selectedHotel}
-                />
+                <CardHotel key={item.id} hotel={item} select={onSelectHotel} selectedHotel={selectedHotel} />
               ))}
             </Cards>
           </Container>
-        ) : (<></>)}
+        ) : (
+          <></>
+        )}
 
-        {hotelsData?.length > 0 && selectedHotel ? (
+        {hotelsData && selectedHotel ? (
           <Container>
             <StyledTypography variant="h6">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
+            {hotels && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
+            <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
           </Container>
-        ) : (<></>)}
-
+        ) : (
+          <></>
+        )}
       </>
     );
   }
@@ -86,23 +117,15 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
 
 const StyledTypography = styled(Typography)`
   color: gray;
-`;
-
-const Center = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 230px;
-  margin-left: 230px;
-  width: 378px;
+  margin: 36px 0 18px !important;
 `;
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
-  margin-top: 17px;
+  /* justify-content: flex-start; */
+  /* margin-top: 17px; */
 `;
 
 const Cards = styled.div`
@@ -110,33 +133,6 @@ const Cards = styled.div`
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
-`;
-
-const P1 = styled.div`
-  font-weight: 100;
-  font-size: 17px;
-  line-height: 23px;
-  text-align: center;
-  color: #8e8e8e;
-`;
-
-const Din = styled.div`
-  font-weight: 100;
-  font-size: 14px;
-  line-height: 23px;
-  text-align: center;
-  color: #8e8e8e;
-`;
-
-const Confirmation = styled.div`
-  display: flex;
-  margin-top: 17px;
-  p {
-    margin-left: 14px;
-    font-style: normal;
-    font-size: 14px;
-    line-height: 19px;
-  }
 `;
 
 const ErrorContainer = styled.div`
@@ -147,14 +143,14 @@ const ErrorContainer = styled.div`
   margin-left: 23%;
   width: 55%;
 
-    h1{
-      font-family: 'Roboto';
-      font-style: normal;
-      font-weight: 400;
-      font-size: 20px;
-      line-height: 23px;
-      text-align: center;
+  h1 {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 23px;
+    text-align: center;
 
-      color: #8E8E8E;
+    color: #8e8e8e;
   }
 `;

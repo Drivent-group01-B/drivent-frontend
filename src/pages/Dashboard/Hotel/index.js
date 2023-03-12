@@ -8,12 +8,8 @@ export default function ChooseAccommodation() {
     <>
       <Typography variant="h4">Escolha de Quarto e Hotel</Typography>
 
-      {!showBooking && <Hotel
-        showBooking={showBooking}
-        setShowFinishPayment={setShowBooking}/>}
+      {!showBooking && <Hotel showBooking={showBooking} setShowFinishPayment={setShowBooking} />}
       {showBooking && <>ComponenteFinalização</>}
-      
     </>
   );
 }
-
