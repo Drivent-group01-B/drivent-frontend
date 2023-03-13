@@ -10,3 +10,13 @@ export async function bookRoomById(token, roomId) {
 
   return res.data;
 }
+
+export async function getBooking(token) {
+  const res = await api.get('/booking', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+}

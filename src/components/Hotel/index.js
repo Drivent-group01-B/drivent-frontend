@@ -11,26 +11,35 @@ import { toast } from 'react-toastify';
 import { bookRoomById } from '../../services/bookingApi';
 import ConfirmationButton from '../../components/ConfirmationButton';
 import { getHotelRoomsWithDetails, getHotels } from '../../services/hotelApi';
+import { getBooking } from '../../services/bookingApi';
 
 export default function ChooseTicket({ showBooking, setShowBooking }) {
   const token = useToken();
   const { hotels } = useHotels();
-
   const [hotelsData, setHotelsData] = useState(null);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [includeHotel, setIncludeHotel] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('RESERVED');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
+  const [ bookingData, setBookingData ] = useState(null);
+  const [ bookingHotel, setBookingHotel ] = useState(null);
+  const [ roomQtd, setRoomQtd ] = useState();
 
   useEffect(async () => {
     const ticket = await getTicketByUserId(token);
     setIncludeHotel(ticket.includedHotel);
     setPaymentStatus(ticket.status);
-
     if (ticket) {
       fetchHotelsData();
-    }
+    } 
+    const booking = await getBooking(token);
+    const hotels = await getHotels(token);
+    const h = hotels.find(hotel => hotel.id === booking.Room.hotelId);
+    setBookingHotel(h);  
+    const response = await getHotelRoomsWithDetails(token, h.id);
+    setRoomQtd(response);
+    setBookingData(booking);
   }, []);
 
   const onSelectHotel = (hotel) => {
@@ -69,8 +78,28 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
       toast.error('Erro inesperado!');
     }
   }
-
-  if (!includeHotel) {
+  if(bookingData) {
+    return (
+      <Container>
+        <StyledTypography variant="h6">Você já escolheu seu quarto:</StyledTypography>
+        <Caixas>
+          <Card>
+            <Image url={bookingHotel.image} />       
+            <Title>{bookingHotel.name}</Title>
+            <ContainerText>
+              <strong>Quarto reservado</strong>
+              <span>{bookingData.Room.name} ({bookingData.Room.capacity === 1 ? ('Single') : bookingData.Room.capacity === 2 ? ('Double') : 'Triple'})</span>
+            </ContainerText>
+            <ContainerText>
+              <strong>Pessoas no seu quarto </strong>
+              <span>{ roomQtd.availability.occupied === 1 ? 'Você sozinho' : `Você e mais ${roomQtd.availability.occupied - 1}` }</span>
+            </ContainerText>
+          </Card>
+        </Caixas>
+      </Container>
+    );
+  }
+  else if (!includeHotel) {
     return (
       <ErrorContainer>
         <h1>
@@ -114,6 +143,56 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
     );
   }
 }
+
+const Caixas = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+`;
+const Card = styled.div`
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  align-items: flex-start;
+  width: 196px;
+  height: 264px;
+  border-radius: 10px;
+  margin-right: 25px;
+  margin-top: 15px;
+  padding: 15px;
+  background: #FFEED2;
+`;
+const Image = styled.div`
+  width: 168px;
+  height: 109px;
+  align-self: center;
+  border-radius: 5px;
+  background-image: url(${(props) => props.url});
+  background-size: cover;
+`;
+
+const Title = styled.div`
+  width: 80%;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 23px;
+  color: #343434;
+  margin-top: 8px;
+`;
+
+const ContainerText = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 79%;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  color: #3c3c3c;
+  margin-top: 10px;
+`;
 
 const StyledTypography = styled(Typography)`
   color: gray;
