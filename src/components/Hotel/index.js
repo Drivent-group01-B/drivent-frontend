@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import useHotels from '../../hooks/api/useHotels';
 import CardHotel from './CardHotel';
 import { getTicketByUserId } from '../../services/ticketApi';
+import { getBookingByUserId  } from '../../services/bookingApi';
 import useToken from '../../hooks/useToken';
 import Rooms from './Rooms';
 import { toast } from 'react-toastify';
@@ -14,12 +15,12 @@ import { getHotelRoomsWithDetails, getHotels } from '../../services/hotelApi';
 
 export default function ChooseTicket({ showBooking, setShowBooking }) {
   const token = useToken();
-  const { hotels } = useHotels();
-
+  
   const [hotelsData, setHotelsData] = useState(null);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [includedHotel, setIncludedHotel] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('RESERVED');
+  const [ booking, setBooking ] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
 
@@ -28,8 +29,13 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
     setIncludedHotel(ticket.TicketType.includesHotel);
     setPaymentStatus(ticket.status);
 
-    if (ticket) {
+    if (ticket && ticket.TicketType.includesHotel) {
       fetchHotelsData();
+    }
+
+    const bookingData = await getBookingByUserId(token);
+    if(bookingData) {
+      setBooking(bookingData);
     }
   }, []);
 
@@ -86,6 +92,10 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
         <h1>Você precisa ter confirmado pagamento antes de fazer a escolha de hospedagem</h1>
       </ErrorContainer>
     );
+  } else if (booking?.Room) {
+    return (
+      <>Você já escolheu seu quarto</>
+    );
   } else {
     return (
       <>
@@ -105,7 +115,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
         {hotelsData && selectedHotel ? (
           <Container>
             <StyledTypography variant="h6">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
-            {hotels && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
+            {hotelsData && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
             <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
           </Container>
         ) : (

@@ -67,6 +67,7 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment, 
 
     if(selectedType === 2) {
       selectedRemote = true;
+      includedHotel = false;
     }
 
     let ticketTypeId = 0;
@@ -80,6 +81,20 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment, 
     });
 
     return ticketTypeId;
+  };
+
+  const setTicketTypeId = () => {
+    if(ticket?.TicketType.isRemote) {
+      setSelectedType(2);
+    }
+    if(!ticket?.TicketType.isRemote && !ticket?.TicketType.includesHotel) {
+      setSelectedType(1);
+      setSelectedOptionHotel(1);
+    }
+    if(!ticket?.TicketType.isRemote && ticket?.TicketType.includesHotel) {
+      setSelectedType(1);
+      setSelectedOptionHotel(2);
+    }
   };
  
   useEffect(() => {
@@ -106,11 +121,7 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment, 
         return;
       }
       setTicketData(ticket);
-      setSelectedType([ticket.TicketType]);
-      if(!ticket.isRemote) {
-        setSelectedOptionHotel(ticket.includedHotel ? [2] : [1] );
-        setTotal(ticket.TicketType.price+ticket.TicketType.hotelTax);
-      }
+      setTicketTypeId();
     }
   }, [enrollment, ticketsTypes, ticket]);
 
