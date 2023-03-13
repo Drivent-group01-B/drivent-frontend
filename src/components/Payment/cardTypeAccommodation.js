@@ -5,7 +5,7 @@ export default function Card({ id, price, name, selectedOptionHotel, select, upd
   const [ isSelected, setSelected ] = useState(false);
 
   useEffect(() => {
-    if(selectedOptionHotel[0] === id) {
+    if(selectedOptionHotel === id) {
       setSelected(true);
     }else{
       setSelected(false);

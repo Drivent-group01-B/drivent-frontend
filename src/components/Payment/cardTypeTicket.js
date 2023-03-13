@@ -1,25 +1,21 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-export default function Card({ id, price, isRemote, includesHotel, selectedType, select, type }) {
+export default function Card({ id, name, price, selectedType, select }) {
   const [ isSelected, setSelected ] = useState(false);
 
   useEffect(() => {
-    if(selectedType?.length > 0) {
-      if(selectedType[0]?.id === id) {
-        setSelected(true);
-      }else{
-        setSelected(false);
-      }
-      return;
+    if(selectedType === id) {
+      setSelected(true);
+    }else{
+      setSelected(false);
     }
-    setSelected(false);
   }, [selectedType]);
 
   return (
     <>
-      <Caixa back={isSelected} onClick={() => select(type)}>        
-        <div>{isRemote ? 'Online' : 'Presencial'}</div>
+      <Caixa back={isSelected} onClick={() => select(id, price)}>        
+        <div>{name}</div>
         <Din>{ price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) }</Din>
       </Caixa>
     </>

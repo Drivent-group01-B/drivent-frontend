@@ -11,39 +11,89 @@ import useTicket from '../../hooks/api/useTicket';
 export default function ChooseTicket({ showFinishPayment, setShowFinishPayment, setValue }) {
   const { ticketsTypes } = useTicketsTypes();
   const [ types, setTypes ] = useState([]);
-  const [ selectedType, setSelectedType ] = useState([]);
-  const [ selectedOptionHotel, setSelectedOptionHotel ] = useState([]);
+  const [ selectedType, setSelectedType ] = useState();
+  const [ selectedOptionHotel, setSelectedOptionHotel ] = useState();
   const [ total, setTotal ] = useState(0);
   const { enrollment } = useEnrollment();
   const [withEnrollment, setWithEnrollmentt] = useState(false);
   const { ticket, ticketError, ticketLoading } = useTicket();
   const [ ticketData, setTicketData ] = useState();
+  const [ valueNotRemoteTicket, setValueNotRemoteTicket ] = useState(0);
+  const [ valueRemoteTicket, setValueRemoteTicket ] = useState(0);
+  const [ valueNotRemoteWithHotelTicket, setValueNotRemoteWithHotelTicket ] = useState(0);
 
-  const onSelectType = (type) => {
-    if(selectedType[0]?.id === type?.id) {
-      setSelectedType([]);
-      setSelectedOptionHotel([]);
+  const onSelectType = (id, price) => {
+    if(selectedType === id) {
+      setSelectedType();
+      setSelectedOptionHotel();
       setTotal(0);
       return;
     }
-    setSelectedType([type]);
-    setTotal(parseInt(type?.price));
+    setSelectedType(id);
+    setTotal(parseInt(price));
   };
 
   const onSelectAcc = (id) => {
-    if(selectedOptionHotel[0] === id) {
-      setSelectedOptionHotel([]);
+    if(selectedOptionHotel === id) {
+      setSelectedOptionHotel();
       return;
     }
   
-    setSelectedOptionHotel([id]);  
+    setSelectedOptionHotel(id);  
   };
 
   const updateTotal = () => {
-    if(selectedOptionHotel[0] === 2) {
-      setTotal(parseInt(selectedType[0]?.price)+350);
-    }else {
-      setTotal(parseInt(selectedType[0]?.price));
+    if(selectedType === 1) {
+      if(selectedOptionHotel === 2) {
+        setTotal(parseInt(valueNotRemoteWithHotelTicket));
+      }else{
+        setTotal(parseInt(valueNotRemoteTicket));
+      }
+    }
+  };
+
+  const getTicketTypeId = () => {
+    let selectedRemote, includedHotel;
+
+    if(selectedType === 1) {
+      selectedRemote = false;
+      if(selectedOptionHotel === 1) {
+        includedHotel = false;
+      }
+      if(selectedOptionHotel === 2) {
+        includedHotel = true;
+      }
+    }
+
+    if(selectedType === 2) {
+      selectedRemote = true;
+      includedHotel = false;
+    }
+
+    let ticketTypeId = 0;
+
+    ticketsTypes.map(item => {
+      if(selectedRemote === item.isRemote) {
+        if(includedHotel === item.includesHotel) {
+          ticketTypeId = item.id;
+        }
+      }
+    });
+
+    return ticketTypeId;
+  };
+
+  const setTicketTypeId = () => {
+    if(ticket?.TicketType.isRemote) {
+      setSelectedType(2);
+    }
+    if(!ticket?.TicketType.isRemote && !ticket?.TicketType.includesHotel) {
+      setSelectedType(1);
+      setSelectedOptionHotel(1);
+    }
+    if(!ticket?.TicketType.isRemote && ticket?.TicketType.includesHotel) {
+      setSelectedType(1);
+      setSelectedOptionHotel(2);
     }
   };
  
@@ -53,6 +103,17 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment, 
     }
     if(ticketsTypes) {
       setTypes(ticketsTypes);
+      ticketsTypes.map(item => {
+        if(item.isRemote) {
+          setValueRemoteTicket(item.price);
+        }
+        if(!item.isRemote && !item.includesHotel) {
+          setValueNotRemoteTicket(item.price);
+        }
+        if(!item.isRemote && item.includesHotel) {
+          setValueNotRemoteWithHotelTicket(item.price);
+        }
+      });
     }
     if(ticket) {
       if(ticket.status === 'PAID') {
@@ -60,11 +121,7 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment, 
         return;
       }
       setTicketData(ticket);
-      setSelectedType([ticket.TicketType]);
-      if(!ticket.isRemote) {
-        setSelectedOptionHotel(ticket.includedHotel ? [2] : [1] );
-        setTotal(ticket.TicketType.price+ticket.TicketType.hotelTax);
-      }
+      setTicketTypeId();
     }
   }, [enrollment, ticketsTypes, ticket]);
 
@@ -75,26 +132,26 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment, 
           <Container>
             <P1>Primeiro, escolha sua modalidade de ingresso</P1>
             <Caixas>
-              {types?.length > 0 ? (
-                types.map((type) => (
-                  <Card
-                    key={type.id}
-                    id={type.id}
-                    name={type.name}
-                    price={type.price}
-                    isRemote={type.isRemote}
-                    includesHotel={type.includesHotel}
-                    selectedType={selectedType}
-                    select={onSelectType}
-                    type={type}
-                  />
-                ))): 
-                <P1>Ingressos não disponíveis ainda...</P1>
-              }
+              <Card
+                key={1}
+                id={1}
+                name={'Presencial'}
+                price={valueNotRemoteTicket}
+                selectedType={selectedType}
+                select={onSelectType}
+              />
+              <Card
+                key={2}
+                id={2}
+                name={'Online'}
+                price={valueRemoteTicket}
+                selectedType={selectedType}
+                select={onSelectType}
+              />     
             </Caixas>
           </Container>
           <Container>
-            {selectedType?.length > 0 && selectedType[0].includesHotel ? (
+            {selectedType && selectedType === 1 ? (
               <>
                 <P1>Ótimo! Agora escolha sua modalidade de hospedagem</P1>
                 <Caixas>
@@ -110,7 +167,7 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment, 
                   <CardAcc
                     key={2}
                     id={2}
-                    price={350}
+                    price={valueNotRemoteWithHotelTicket-valueNotRemoteTicket}
                     name={'Com Hotel'}
                     selectedOptionHotel={selectedOptionHotel}
                     select={onSelectAcc}
@@ -122,18 +179,14 @@ export default function ChooseTicket({ showFinishPayment, setShowFinishPayment, 
             
           </Container>
           <Container>
-            {((selectedType?.length > 0 && 
-            selectedType[0].includesHotel && 
-            selectedOptionHotel?.length > 0) || 
-            (selectedType?.length > 0 && selectedType[0].isRemote)
-            ) ? (
-                <ConfirmTicket ticketTypeId={selectedType[0]?.id}
-                  ticketData={ticketData}
-                  value={total}
-                  includedHotel={selectedOptionHotel[0] === 2 ? true : false} 
-                  showFinishPayment={showFinishPayment}
-                  setShowFinishPayment={setShowFinishPayment}/>
-              ):(<></>)}
+            {selectedType === 2 || selectedOptionHotel ? (
+              <ConfirmTicket 
+                getTicketTypeId={getTicketTypeId}
+                ticketData={ticketData}
+                value={total}
+                showFinishPayment={showFinishPayment}
+                setShowFinishPayment={setShowFinishPayment}/>
+            ):(<></>)}
             
           </Container>
         </>

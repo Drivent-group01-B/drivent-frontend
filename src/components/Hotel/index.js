@@ -18,7 +18,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
   const { hotels } = useHotels();
   const [hotelsData, setHotelsData] = useState(null);
   const [selectedHotel, setSelectedHotel] = useState(null);
-  const [includeHotel, setIncludeHotel] = useState(false);
+  const [includedHotel, setIncludedHotel] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('RESERVED');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
@@ -27,12 +27,6 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
   const [ roomQtd, setRoomQtd ] = useState();
 
   useEffect(async () => {
-    const ticket = await getTicketByUserId(token);
-    setIncludeHotel(ticket.includedHotel);
-    setPaymentStatus(ticket.status);
-    if (ticket) {
-      fetchHotelsData();
-    } 
     const booking = await getBooking(token);
     const hotels = await getHotels(token);
     const h = hotels.find(hotel => hotel.id === booking.Room.hotelId);
@@ -40,7 +34,13 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
     const response = await getHotelRoomsWithDetails(token, h.id);
     setRoomQtd(response);
     setBookingData(booking);
-  }, []);
+    const ticket = await getTicketByUserId(token);
+    setIncludedHotel(ticket.TicketType.includesHotel);
+    setPaymentStatus(ticket.status);
+    if (ticket && ticket.TicketType.includesHotel) {
+      fetchHotelsData();
+    }
+  }, [bookingData, includedHotel, paymentStatus]);
 
   const onSelectHotel = (hotel) => {
     if (selectedHotel === hotel) {
@@ -72,7 +72,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
 
   async function createBookingRoom() {
     try {
-      await bookRoomById(token, selectedRoom.id);
+      await bookRoomById(token, selectedRoom);
       toast('Reservado!');
     } catch (error) {
       toast.error('Erro inesperado!');
@@ -99,7 +99,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
       </Container>
     );
   }
-  else if (!includeHotel) {
+  else if (!includedHotel) {
     return (
       <ErrorContainer>
         <h1>
@@ -122,7 +122,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
             <StyledTypography variant="h6">Primeiro, escolha o seu hotel</StyledTypography>
             <Cards>
               {hotelsData.map((item) => (
-                <CardHotel key={item.id} hotel={item} select={onSelectHotel} selectedHotel={selectedHotel} />
+                <CardHotel key={item.id} hotel={item} select={onSelectHotel} selectedHotel={selectedHotel} getRooms={fetchHotelWithRoomsData} />
               ))}
             </Cards>
           </Container>
@@ -133,7 +133,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
         {hotelsData && selectedHotel ? (
           <Container>
             <StyledTypography variant="h6">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
-            {hotels && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
+            {hotelsData && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
             <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
           </Container>
         ) : (

@@ -6,8 +6,7 @@ import { createTicket } from '../../services/ticketApi.js';
 
 export default function ConfirmTicket({
   ticketData,
-  ticketTypeId,
-  includedHotel,
+  getTicketTypeId,
   value,
   showFinishPayment,
   setShowFinishPayment,
@@ -16,12 +15,13 @@ export default function ConfirmTicket({
   const config = { headers: { Authorization: `Bearer ${userData.token}` } };
 
   async function bookTicket() {
+    let ticketTypeId = getTicketTypeId();
     let newTicket = {};
     if (ticketData) {
       delete ticketData.TicketType;
       newTicket = { ...ticketData };
     }
-    newTicket = { ...newTicket, ticketTypeId, includedHotel };
+    newTicket = { ...newTicket, ticketTypeId };
     try {
       const ticket = await createTicket(newTicket, config);
       if (ticket) {
