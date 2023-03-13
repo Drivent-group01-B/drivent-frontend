@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import useRooms from '../../hooks/api/useRooms';
 
-export default function CardHotel({ hotel, select, selectedHotel }) {
+export default function CardHotel({ hotel, select, selectedHotel, getRooms }) {
+  const { rooms } = useRooms(hotel.id);
   const [isSelected, setSelected] = useState(false);
+  const [ vacancy, setVacancy ] = useState();
+  const [ accTypes, setAccTypes ] = useState('');
 
   useEffect(() => {
     if (selectedHotel) {
@@ -14,12 +18,17 @@ export default function CardHotel({ hotel, select, selectedHotel }) {
       return;
     }
     setSelected(false);
-  }, [selectedHotel]);
+
+    if(rooms && rooms?.rooms?.length > 0) {
+      getTypesAcc();
+      getVacancy();
+    }
+  }, [selectedHotel, rooms]);
 
   const getTypesAcc = () => {
-    const includesSingle = hotel?.Rooms.some((item) => item.capacity === 1);
-    const includesDouble = hotel?.Rooms.some((item) => item.capacity === 2);
-    const includesTriple = hotel?.Rooms.some((item) => item.capacity === 3);
+    const includesSingle = rooms?.rooms.some((item) => item?.capacity === 1 && item?._count.Booking < item?.capacity);
+    const includesDouble = rooms?.rooms.some((item) => item?.capacity === 2 && item?._count.Booking < item?.capacity);
+    const includesTriple = rooms?.rooms.some((item) => item?.capacity === 3 && item?._count.Booking < item?.capacity);
 
     let result = '';
 
@@ -28,23 +37,25 @@ export default function CardHotel({ hotel, select, selectedHotel }) {
       result += includesDouble && includesTriple ? ', Double e Triple' : '';
       result += includesDouble ? ' e Double' : '';
       result += includesTriple ? ' e Triple' : '';
-      return result;
+      setAccTypes(result);
+      return;
     }
     if (includesDouble) {
       result += 'Double';
       result += includesTriple ? ' e Triple' : '';
-      return result;
+      setAccTypes(result);
+      return;
     }
     if (includesTriple) {
       result += 'Triple';
     }
 
-    return result;
+    setAccTypes(result);
   };
 
   const getVacancy = () => {
-    const vacanciesCount = hotel?.Rooms.reduce((sum, item) => sum + parseInt(item.capacity), 0);
-    return vacanciesCount;
+    const vacanciesCount = parseInt(rooms?.availability?.total) - parseInt(rooms?.availability?.occupied);
+    setVacancy(vacanciesCount);
   };
 
   return (
@@ -54,11 +65,11 @@ export default function CardHotel({ hotel, select, selectedHotel }) {
         <Title>{hotel.name}</Title>
         <ContainerText>
           <strong>Tipos de acomodação: </strong>
-          <span>{getTypesAcc()}</span>
+          <span>{accTypes}</span>
         </ContainerText>
         <ContainerText>
           <strong>Vagas disponíveis: </strong>
-          <span>{getVacancy()}</span>
+          <span>{vacancy}</span>
         </ContainerText>
       </Card>
     </>

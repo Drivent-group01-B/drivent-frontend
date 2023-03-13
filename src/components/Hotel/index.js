@@ -18,14 +18,14 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
 
   const [hotelsData, setHotelsData] = useState(null);
   const [selectedHotel, setSelectedHotel] = useState(null);
-  const [includeHotel, setIncludeHotel] = useState(false);
+  const [includedHotel, setIncludedHotel] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('RESERVED');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
 
   useEffect(async () => {
     const ticket = await getTicketByUserId(token);
-    setIncludeHotel(ticket.includedHotel);
+    setIncludedHotel(ticket.TicketType.includesHotel);
     setPaymentStatus(ticket.status);
 
     if (ticket) {
@@ -63,14 +63,15 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
 
   async function createBookingRoom() {
     try {
-      await bookRoomById(token, selectedRoom.id);
+      console.log(selectedRoom);
+      await bookRoomById(token, selectedRoom);
       toast('Reservado!');
     } catch (error) {
       toast.error('Erro inesperado!');
     }
   }
 
-  if (!includeHotel) {
+  if (!includedHotel) {
     return (
       <ErrorContainer>
         <h1>
@@ -93,7 +94,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
             <StyledTypography variant="h6">Primeiro, escolha o seu hotel</StyledTypography>
             <Cards>
               {hotelsData.map((item) => (
-                <CardHotel key={item.id} hotel={item} select={onSelectHotel} selectedHotel={selectedHotel} />
+                <CardHotel key={item.id} hotel={item} select={onSelectHotel} selectedHotel={selectedHotel} getRooms={fetchHotelWithRoomsData} />
               ))}
             </Cards>
           </Container>
