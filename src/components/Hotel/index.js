@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
-import useHotels from '../../hooks/api/useHotels';
 import CardHotel from './CardHotel';
 import { getTicketByUserId } from '../../services/ticketApi';
 import useToken from '../../hooks/useToken';
@@ -12,35 +11,62 @@ import { bookRoomById } from '../../services/bookingApi';
 import ConfirmationButton from '../../components/ConfirmationButton';
 import { getHotelRoomsWithDetails, getHotels } from '../../services/hotelApi';
 import { getBooking } from '../../services/bookingApi';
+import { useBooking } from '../../hooks/api/useBooking';
 
 export default function ChooseTicket({ showBooking, setShowBooking }) {
   const token = useToken();
-  const { hotels } = useHotels();
+  const { booking } = useBooking();
   const [hotelsData, setHotelsData] = useState(null);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [includedHotel, setIncludedHotel] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('RESERVED');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
-  const [ bookingData, setBookingData ] = useState(null);
-  const [ bookingHotel, setBookingHotel ] = useState(null);
-  const [ roomQtd, setRoomQtd ] = useState();
+  const [bookingData, setBookingData] = useState(null);
+  const [bookingHotel, setBookingHotel] = useState(null);
+  const [roomQtd, setRoomQtd] = useState();
+  const [userBookedRoom, setUserBookedRoom] = useState();
 
   useEffect(async () => {
-    const booking = await getBooking(token);
-    const hotels = await getHotels(token);
-    const h = hotels.find(hotel => hotel.id === booking.Room.hotelId);
-    setBookingHotel(h);  
-    const response = await getHotelRoomsWithDetails(token, h.id);
-    setRoomQtd(response);
-    setBookingData(booking);
     const ticket = await getTicketByUserId(token);
     setIncludedHotel(ticket.TicketType.includesHotel);
     setPaymentStatus(ticket.status);
+
     if (ticket && ticket.TicketType.includesHotel) {
       fetchHotelsData();
     }
-  }, [bookingData, includedHotel, paymentStatus]);
+
+    // const h = hotelsData.find((hotel) => hotel.id === booking.Room.hotelId);
+    // setBookingHotel(h);
+    // console.log(h);
+
+    // const hotels = await getHotels(token);
+    // const booking = await getBooking(token);
+
+    // const response = await getHotelRoomsWithDetails(token, h.id);
+    // setRoomQtd(response);
+    // setBookingData(booking);
+  }, []);
+  // bookingData, includedHotel, paymentStatus;
+
+  useEffect(async () => {
+    let userBookedHotel;
+    if (hotelsData && booking) {
+      userBookedHotel = hotelsData.find((hotel) => hotel.id === booking.Room.hotelId);
+      console.log(userBookedHotel);
+      setBookingHotel(userBookedHotel);
+      await fetchHotelWithRoomsData(userBookedHotel.id);
+    }
+  }, [hotelsData]);
+
+  useEffect(() => {
+    let userBookedRoom;
+    if (rooms) {
+      userBookedRoom = rooms.find((room) => room.id === booking.Room.id);
+      // setSelectedRoom(userBookedRoom);
+      console.log(userBookedRoom);
+    }
+  }, [rooms]);
 
   const onSelectHotel = (hotel) => {
     if (selectedHotel === hotel) {
@@ -56,6 +82,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
     try {
       const response = await getHotelRoomsWithDetails(token, hotelId);
       setRooms(response);
+      console.log(response);
     } catch (error) {
       toast.error('Erro inesperado!', error.message);
     }
@@ -65,6 +92,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
     try {
       const response = await getHotels(token);
       setHotelsData(response);
+      // console.log(response);
     } catch (error) {
       toast.error('Erro inesperado!', error.message);
     }
@@ -78,28 +106,31 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
       toast.error('Erro inesperado!');
     }
   }
-  if(bookingData) {
+
+  if (bookingHotel) {
     return (
       <Container>
         <StyledTypography variant="h6">Você já escolheu seu quarto:</StyledTypography>
         <Caixas>
           <Card>
-            <Image url={bookingHotel.image} />       
+            <Image url={bookingHotel.image} />
             <Title>{bookingHotel.name}</Title>
             <ContainerText>
               <strong>Quarto reservado</strong>
-              <span>{bookingData.Room.name} ({bookingData.Room.capacity === 1 ? ('Single') : bookingData.Room.capacity === 2 ? ('Double') : 'Triple'})</span>
+              <span>
+                {booking.Room.name} (
+                {booking.Room.capacity === 1 ? 'Single' : booking.Room.capacity === 2 ? 'Double' : 'Triple'})
+              </span>
             </ContainerText>
             <ContainerText>
               <strong>Pessoas no seu quarto </strong>
-              <span>{ roomQtd.availability.occupied === 1 ? 'Você sozinho' : `Você e mais ${roomQtd.availability.occupied - 1}` }</span>
+              {/* <span>{roomQtd.availability.occupied === 1 ? 'Você sozinho' : `Você e mais ${2 - 1}`}</span> */}
             </ContainerText>
           </Card>
         </Caixas>
       </Container>
     );
-  }
-  else if (!includedHotel) {
+  } else if (!includedHotel) {
     return (
       <ErrorContainer>
         <h1>
@@ -114,34 +145,40 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
         <h1>Você precisa ter confirmado pagamento antes de fazer a escolha de hospedagem</h1>
       </ErrorContainer>
     );
-  } else {
-    return (
-      <>
-        {hotelsData ? (
-          <Container>
-            <StyledTypography variant="h6">Primeiro, escolha o seu hotel</StyledTypography>
-            <Cards>
-              {hotelsData.map((item) => (
-                <CardHotel key={item.id} hotel={item} select={onSelectHotel} selectedHotel={selectedHotel} getRooms={fetchHotelWithRoomsData} />
-              ))}
-            </Cards>
-          </Container>
-        ) : (
-          <></>
-        )}
-
-        {hotelsData && selectedHotel ? (
-          <Container>
-            <StyledTypography variant="h6">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
-            {hotelsData && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
-            <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
-          </Container>
-        ) : (
-          <></>
-        )}
-      </>
-    );
   }
+
+  return (
+    <>
+      {hotelsData ? (
+        <Container>
+          <StyledTypography variant="h6">Primeiro, escolha o seu hotel</StyledTypography>
+          <Cards>
+            {hotelsData.map((item) => (
+              <CardHotel
+                key={item.id}
+                hotel={item}
+                select={onSelectHotel}
+                selectedHotel={selectedHotel}
+                getRooms={fetchHotelWithRoomsData}
+              />
+            ))}
+          </Cards>
+        </Container>
+      ) : (
+        <></>
+      )}
+
+      {hotelsData && selectedHotel ? (
+        <Container>
+          <StyledTypography variant="h6">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
+          {hotelsData && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
+          <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
+        </Container>
+      ) : (
+        <></>
+      )}
+    </>
+  );
 }
 
 const Caixas = styled.div`
@@ -161,7 +198,7 @@ const Card = styled.div`
   margin-right: 25px;
   margin-top: 15px;
   padding: 15px;
-  background: #FFEED2;
+  background: #ffeed2;
 `;
 const Image = styled.div`
   width: 168px;
