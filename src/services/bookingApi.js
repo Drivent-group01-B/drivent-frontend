@@ -11,7 +11,7 @@ export async function bookRoomById(token, roomId) {
   return res.data;
 }
 
-export async function getBookingByUserId(token) {
+export async function getBooking(token) {
   const res = await api.get('/booking', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -19,4 +19,4 @@ export async function getBookingByUserId(token) {
   });
 
   return res.data;
-};
+}
