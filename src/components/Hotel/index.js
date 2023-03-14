@@ -8,7 +8,7 @@ import { getTicketByUserId } from '../../services/ticketApi';
 import useToken from '../../hooks/useToken';
 import Rooms from './Rooms';
 import { toast } from 'react-toastify';
-import { bookRoomById } from '../../services/bookingApi';
+import { bookRoomById, updateRoomById } from '../../services/bookingApi';
 import ConfirmationButton from '../../components/ConfirmationButton';
 import { getHotelRoomsWithDetails, getHotels } from '../../services/hotelApi';
 import { getBooking } from '../../services/bookingApi';
@@ -25,6 +25,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
   const [ bookingData, setBookingData ] = useState(null);
   const [ bookingHotel, setBookingHotel ] = useState(null);
   const [ roomQtd, setRoomQtd ] = useState();
+  const [updateRoom, setUpdateRoom] = useState(false);
 
   useEffect(async () => {
     const booking = await getBooking(token);
@@ -78,7 +79,18 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
       toast.error('Erro inesperado!');
     }
   }
-  if(bookingData) {
+
+  async function updateBookingRoom() {
+    try {
+      await updateRoomById(token, selectedRoom, bookingData.id);
+      setUpdateRoom(false);
+      toast('Quarto alterado com sucesso!');
+    } catch (error) {
+      toast.error('Erro inesperado!');
+    }
+  }
+
+  if(bookingData && !updateRoom) {
     return (
       <Container>
         <StyledTypography variant="h6">Você já escolheu seu quarto:</StyledTypography>
@@ -96,6 +108,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
             </ContainerText>
           </Card>
         </Caixas>
+        <UpdateButton onClick={() => setUpdateRoom(true)}>TROCAR DE QUARTO</UpdateButton>
       </Container>
     );
   }
@@ -134,8 +147,8 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
           <Container>
             <StyledTypography variant="h6">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
             {hotelsData && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
-            <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
-          </Container>
+            {updateRoom ? <ConfirmationButton onClick={updateBookingRoom}>TROCAR QUARTO</ConfirmationButton> : <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
+            } </Container>
         ) : (
           <></>
         )}
@@ -231,5 +244,26 @@ const ErrorContainer = styled.div`
     text-align: center;
 
     color: #8e8e8e;
+  }
+`;
+
+const UpdateButton = styled.button`
+  width: 182px;
+  height: 37px;
+  margin-top: 43px;
+  background: #e0e0e0;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+  text-align: center;
+  color: #000000;
+  border: none;
+  outline: none;
+  &:hover {
+    filter: brightness(0.9);
   }
 `;
