@@ -18,7 +18,7 @@ const RoomCategories = { 1: 'Single', 2: 'Double', 3: 'Triple' };
 
 export default function ChooseTicket() {
   const token = useToken();
-  const { booking } = useBooking();
+  const { booking, bookingLoading } = useBooking();
   const [hotelsData, setHotelsData] = useState(null);
 
   const [bookedHotel, setBookedHotel] = useState(null);
@@ -38,9 +38,6 @@ export default function ChooseTicket() {
     if (booking) {
       const hotel = await getRoomsByHotelId(token, booking.Room.hotelId);
       const rooms = await getHotelRoomsWithDetails(token, booking.Room.hotelId);
-      // console.log('booking ', booking);
-      // console.log('hotel ', hotel);
-      // console.log('rooms ', rooms);
       setBookedHotel(hotel);
       setRooms(rooms);
       setBookedRoom(rooms.rooms.find((room) => room.id === booking.Room.id));
@@ -50,7 +47,7 @@ export default function ChooseTicket() {
     if (ticket && ticket.TicketType.includesHotel) {
       fetchHotelsData();
     }
-  }, []);
+  }, [bookingLoading]);
 
   const onSelectHotel = (hotel) => {
     if (selectedHotel === hotel) {
@@ -66,7 +63,6 @@ export default function ChooseTicket() {
     try {
       const response = await getHotels(token);
       setHotelsData(response);
-      // console.log(response);
     } catch (error) {
       toast.error('Erro inesperado!', error.message);
     }
