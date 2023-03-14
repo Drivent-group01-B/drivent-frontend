@@ -7,17 +7,18 @@ import { toast } from 'react-toastify';
 import useToken from '../../hooks/useToken';
 import { useBooking } from '../../hooks/api/useBooking';
 import { bookRoomById } from '../../services/bookingApi';
-import { getTicketByUserId } from '../../services/ticketApi';
 import { getHotelRoomsWithDetails, getHotels, getRoomsByHotelId } from '../../services/hotelApi';
 
 import Rooms from './Rooms';
 import CardHotel from './CardHotel';
 import ConfirmationButton from '../../components/ConfirmationButton';
+import useTicket from '../../hooks/api/useTicket';
 
 const RoomCategories = { 1: 'Single', 2: 'Double', 3: 'Triple' };
 
 export default function ChooseTicket() {
   const token = useToken();
+  const { ticket, ticketLoading } = useTicket();
   const { booking, bookingLoading } = useBooking();
   const [hotelsData, setHotelsData] = useState(null);
 
@@ -25,16 +26,10 @@ export default function ChooseTicket() {
   const [bookedRoom, setBookedRoom] = useState(null);
 
   const [selectedHotel, setSelectedHotel] = useState(null);
-  const [includedHotel, setIncludedHotel] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState('RESERVED');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
 
   useEffect(async () => {
-    const ticket = await getTicketByUserId(token);
-    setIncludedHotel(ticket.TicketType.includesHotel);
-    setPaymentStatus(ticket.status);
-
     if (booking) {
       const hotel = await getRoomsByHotelId(token, booking.Room.hotelId);
       const rooms = await getHotelRoomsWithDetails(token, booking.Room.hotelId);
@@ -47,7 +42,7 @@ export default function ChooseTicket() {
     if (ticket && ticket.TicketType.includesHotel) {
       fetchHotelsData();
     }
-  }, [bookingLoading]);
+  }, [bookingLoading, ticketLoading]);
 
   const onSelectHotel = (hotel) => {
     if (selectedHotel === hotel) {
@@ -86,7 +81,6 @@ export default function ChooseTicket() {
     }
   }
 
-  // /
   if (booking && bookedHotel && bookedRoom) {
     return (
       <Container>
@@ -111,7 +105,7 @@ export default function ChooseTicket() {
         </Caixas>
       </Container>
     );
-  } else if (!includedHotel) {
+  } else if (!ticket?.TicketType.includesHotel) {
     return (
       <ErrorContainer>
         <h1>
@@ -120,7 +114,7 @@ export default function ChooseTicket() {
         </h1>
       </ErrorContainer>
     );
-  } else if (paymentStatus === 'RESERVED') {
+  } else if (ticket?.status !== 'PAID') {
     return (
       <ErrorContainer>
         <h1>Você precisa ter confirmado pagamento antes de fazer a escolha de hospedagem</h1>
