@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 
 import useToken from '../../hooks/useToken';
 import { useBooking } from '../../hooks/api/useBooking';
-import { bookRoomById } from '../../services/bookingApi';
+import { bookRoomById, updateRoomById } from '../../services/bookingApi';
 import { getHotelRoomsWithDetails, getHotels, getRoomsByHotelId } from '../../services/hotelApi';
 
 import Rooms from './Rooms';
@@ -19,7 +19,7 @@ const RoomCategories = { 1: 'Single', 2: 'Double', 3: 'Triple' };
 export default function ChooseTicket() {
   const token = useToken();
   const { ticket, ticketLoading } = useTicket();
-  const { booking, bookingLoading } = useBooking();
+  const { booking, bookingLoading, getBooking } = useBooking();
   const [hotelsData, setHotelsData] = useState(null);
 
   const [bookedHotel, setBookedHotel] = useState(null);
@@ -28,6 +28,7 @@ export default function ChooseTicket() {
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
+  const [updateRoom, setUpdateRoom] = useState(false);
 
   useEffect(async () => {
     if (booking) {
@@ -39,10 +40,8 @@ export default function ChooseTicket() {
       return;
     }
 
-    if (ticket && ticket.TicketType.includesHotel) {
-      fetchHotelsData();
-    }
-  }, [bookingLoading, ticketLoading]);
+    fetchHotelsData();
+  }, [bookingLoading, ticketLoading, updateRoom]);
 
   const onSelectHotel = (hotel) => {
     if (selectedHotel === hotel) {
@@ -75,13 +74,24 @@ export default function ChooseTicket() {
   async function createBookingRoom() {
     try {
       await bookRoomById(token, selectedRoom);
+      getBooking();
       toast('Reservado!');
     } catch (error) {
       toast.error('Erro inesperado!');
     }
   }
 
-  if (booking && bookedHotel && bookedRoom) {
+  async function updateBookingRoom() {
+    try {
+      await updateRoomById(token, selectedRoom, booking.id);
+      setUpdateRoom(false);
+      toast('Quarto alterado com sucesso!');
+    } catch (error) {
+      toast.error('Erro inesperado!');
+    }
+  }
+
+  if (bookedHotel && bookedRoom && !updateRoom) {
     return (
       <Container>
         <StyledTypography variant="h6">Você já escolheu seu quarto:</StyledTypography>
@@ -103,6 +113,7 @@ export default function ChooseTicket() {
             </ContainerText>
           </Card>
         </Caixas>
+        <UpdateButton onClick={() => setUpdateRoom(true)}>TROCAR DE QUARTO</UpdateButton>
       </Container>
     );
   } else if (!ticket?.TicketType.includesHotel) {
@@ -147,7 +158,11 @@ export default function ChooseTicket() {
         <Container>
           <StyledTypography variant="h6">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
           {hotelsData && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
-          <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
+          {updateRoom ? (
+            <ConfirmationButton onClick={updateBookingRoom}>TROCAR QUARTO</ConfirmationButton>
+          ) : (
+            <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
+          )}
         </Container>
       ) : (
         <></>
@@ -162,6 +177,7 @@ const Caixas = styled.div`
   align-items: flex-start;
   justify-content: flex-start;
 `;
+
 const Card = styled.div`
   display: flex;
   flex-direction: column;
@@ -243,5 +259,26 @@ const ErrorContainer = styled.div`
     text-align: center;
 
     color: #8e8e8e;
+  }
+`;
+
+const UpdateButton = styled.button`
+  width: 182px;
+  height: 37px;
+  margin-top: 43px;
+  background: #e0e0e0;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+  text-align: center;
+  color: #000000;
+  border: none;
+  outline: none;
+  &:hover {
+    filter: brightness(0.9);
   }
 `;
