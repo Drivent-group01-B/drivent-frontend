@@ -2,71 +2,55 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
-import CardHotel from './CardHotel';
-import { getTicketByUserId } from '../../services/ticketApi';
-import useToken from '../../hooks/useToken';
-import Rooms from './Rooms';
 import { toast } from 'react-toastify';
-import { bookRoomById } from '../../services/bookingApi';
-import ConfirmationButton from '../../components/ConfirmationButton';
-import { getHotelRoomsWithDetails, getHotels } from '../../services/hotelApi';
-import { getBooking } from '../../services/bookingApi';
-import { useBooking } from '../../hooks/api/useBooking';
 
-export default function ChooseTicket({ showBooking, setShowBooking }) {
+import useToken from '../../hooks/useToken';
+import { useBooking } from '../../hooks/api/useBooking';
+import { bookRoomById } from '../../services/bookingApi';
+import { getTicketByUserId } from '../../services/ticketApi';
+import { getHotelRoomsWithDetails, getHotels, getRoomsByHotelId } from '../../services/hotelApi';
+
+import Rooms from './Rooms';
+import CardHotel from './CardHotel';
+import ConfirmationButton from '../../components/ConfirmationButton';
+
+const RoomCategories = { 1: 'Single', 2: 'Double', 3: 'Triple' };
+
+export default function ChooseTicket() {
   const token = useToken();
   const { booking } = useBooking();
   const [hotelsData, setHotelsData] = useState(null);
+
+  const [bookedHotel, setBookedHotel] = useState(null);
+  const [bookedRoom, setBookedRoom] = useState(null);
+
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [includedHotel, setIncludedHotel] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('RESERVED');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
-  const [bookingData, setBookingData] = useState(null);
-  const [bookingHotel, setBookingHotel] = useState(null);
-  const [roomQtd, setRoomQtd] = useState();
-  const [userBookedRoom, setUserBookedRoom] = useState();
 
   useEffect(async () => {
     const ticket = await getTicketByUserId(token);
     setIncludedHotel(ticket.TicketType.includesHotel);
     setPaymentStatus(ticket.status);
 
+    if (booking) {
+      const hotel = await getRoomsByHotelId(token, booking.Room.hotelId);
+      const rooms = await getHotelRoomsWithDetails(token, booking.Room.hotelId);
+      // console.log('booking ', booking);
+      // console.log('hotel ', hotel);
+      // console.log('rooms ', rooms);
+      setBookedHotel(hotel);
+      setRooms(rooms);
+      setBookedRoom(rooms.rooms.find((room) => room.id === booking.Room.id));
+      return;
+    }
+
     if (ticket && ticket.TicketType.includesHotel) {
       fetchHotelsData();
     }
-
-    // const h = hotelsData.find((hotel) => hotel.id === booking.Room.hotelId);
-    // setBookingHotel(h);
-    // console.log(h);
-
-    // const hotels = await getHotels(token);
-    // const booking = await getBooking(token);
-
-    // const response = await getHotelRoomsWithDetails(token, h.id);
-    // setRoomQtd(response);
-    // setBookingData(booking);
   }, []);
-  // bookingData, includedHotel, paymentStatus;
-
-  useEffect(async () => {
-    let userBookedHotel;
-    if (hotelsData && booking) {
-      userBookedHotel = hotelsData.find((hotel) => hotel.id === booking.Room.hotelId);
-      console.log(userBookedHotel);
-      setBookingHotel(userBookedHotel);
-      await fetchHotelWithRoomsData(userBookedHotel.id);
-    }
-  }, [hotelsData]);
-
-  useEffect(() => {
-    let userBookedRoom;
-    if (rooms) {
-      userBookedRoom = rooms.find((room) => room.id === booking.Room.id);
-      // setSelectedRoom(userBookedRoom);
-      console.log(userBookedRoom);
-    }
-  }, [rooms]);
 
   const onSelectHotel = (hotel) => {
     if (selectedHotel === hotel) {
@@ -78,21 +62,20 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
     setSelectedHotel(hotel);
   };
 
-  async function fetchHotelWithRoomsData(hotelId) {
-    try {
-      const response = await getHotelRoomsWithDetails(token, hotelId);
-      setRooms(response);
-      console.log(response);
-    } catch (error) {
-      toast.error('Erro inesperado!', error.message);
-    }
-  }
-
   async function fetchHotelsData() {
     try {
       const response = await getHotels(token);
       setHotelsData(response);
       // console.log(response);
+    } catch (error) {
+      toast.error('Erro inesperado!', error.message);
+    }
+  }
+
+  async function fetchHotelWithRoomsData(hotelId) {
+    try {
+      const response = await getHotelRoomsWithDetails(token, hotelId);
+      setRooms(response);
     } catch (error) {
       toast.error('Erro inesperado!', error.message);
     }
@@ -107,24 +90,26 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
     }
   }
 
-  if (bookingHotel) {
+  // /
+  if (booking && bookedHotel && bookedRoom) {
     return (
       <Container>
         <StyledTypography variant="h6">Você já escolheu seu quarto:</StyledTypography>
         <Caixas>
           <Card>
-            <Image url={bookingHotel.image} />
-            <Title>{bookingHotel.name}</Title>
+            <Image url={bookedHotel.image} />
+            <Title>{bookedHotel.name}</Title>
             <ContainerText>
               <strong>Quarto reservado</strong>
               <span>
-                {booking.Room.name} (
-                {booking.Room.capacity === 1 ? 'Single' : booking.Room.capacity === 2 ? 'Double' : 'Triple'})
+                {bookedRoom.name} ({RoomCategories[bookedRoom.capacity]})
               </span>
             </ContainerText>
             <ContainerText>
               <strong>Pessoas no seu quarto </strong>
-              {/* <span>{roomQtd.availability.occupied === 1 ? 'Você sozinho' : `Você e mais ${2 - 1}`}</span> */}
+              <span>
+                {bookedRoom._count.Booking === 1 ? 'Você sozinho' : `Você e mais ${bookedRoom._count.Booking - 1}`}
+              </span>
             </ContainerText>
           </Card>
         </Caixas>
