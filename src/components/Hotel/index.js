@@ -2,46 +2,46 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
-import useHotels from '../../hooks/api/useHotels';
-import CardHotel from './CardHotel';
-import { getTicketByUserId } from '../../services/ticketApi';
-import useToken from '../../hooks/useToken';
-import Rooms from './Rooms';
 import { toast } from 'react-toastify';
-import { bookRoomById, updateRoomById } from '../../services/bookingApi';
-import ConfirmationButton from '../../components/ConfirmationButton';
-import { getHotelRoomsWithDetails, getHotels } from '../../services/hotelApi';
-import { getBooking } from '../../services/bookingApi';
 
-export default function ChooseTicket({ showBooking, setShowBooking }) {
+import useToken from '../../hooks/useToken';
+import { useBooking } from '../../hooks/api/useBooking';
+import { bookRoomById, updateRoomById } from '../../services/bookingApi';
+import { getHotelRoomsWithDetails, getHotels, getRoomsByHotelId } from '../../services/hotelApi';
+
+import Rooms from './Rooms';
+import CardHotel from './CardHotel';
+import ConfirmationButton from '../../components/ConfirmationButton';
+import useTicket from '../../hooks/api/useTicket';
+
+const RoomCategories = { 1: 'Single', 2: 'Double', 3: 'Triple' };
+
+export default function ChooseTicket() {
   const token = useToken();
-  const { hotels } = useHotels();
+  const { ticket, ticketLoading } = useTicket();
+  const { booking, bookingLoading, getBooking } = useBooking();
   const [hotelsData, setHotelsData] = useState(null);
+
+  const [bookedHotel, setBookedHotel] = useState(null);
+  const [bookedRoom, setBookedRoom] = useState(null);
+
   const [selectedHotel, setSelectedHotel] = useState(null);
-  const [includedHotel, setIncludedHotel] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState('RESERVED');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
-  const [ bookingData, setBookingData ] = useState(null);
-  const [ bookingHotel, setBookingHotel ] = useState(null);
-  const [ roomQtd, setRoomQtd ] = useState();
   const [updateRoom, setUpdateRoom] = useState(false);
 
   useEffect(async () => {
-    const booking = await getBooking(token);
-    const hotels = await getHotels(token);
-    const h = hotels.find(hotel => hotel.id === booking.Room.hotelId);
-    setBookingHotel(h);  
-    const response = await getHotelRoomsWithDetails(token, h.id);
-    setRoomQtd(response);
-    setBookingData(booking);
-    const ticket = await getTicketByUserId(token);
-    setIncludedHotel(ticket.TicketType.includesHotel);
-    setPaymentStatus(ticket.status);
-    if (ticket && ticket.TicketType.includesHotel) {
-      fetchHotelsData();
+    if (booking) {
+      const hotel = await getRoomsByHotelId(token, booking.Room.hotelId);
+      const rooms = await getHotelRoomsWithDetails(token, booking.Room.hotelId);
+      setBookedHotel(hotel);
+      setRooms(rooms);
+      setBookedRoom(rooms.rooms.find((room) => room.id === booking.Room.id));
+      return;
     }
-  }, [bookingData, includedHotel, paymentStatus]);
+
+    fetchHotelsData();
+  }, [bookingLoading, ticketLoading, updateRoom]);
 
   const onSelectHotel = (hotel) => {
     if (selectedHotel === hotel) {
@@ -53,15 +53,6 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
     setSelectedHotel(hotel);
   };
 
-  async function fetchHotelWithRoomsData(hotelId) {
-    try {
-      const response = await getHotelRoomsWithDetails(token, hotelId);
-      setRooms(response);
-    } catch (error) {
-      toast.error('Erro inesperado!', error.message);
-    }
-  }
-
   async function fetchHotelsData() {
     try {
       const response = await getHotels(token);
@@ -71,9 +62,19 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
     }
   }
 
+  async function fetchHotelWithRoomsData(hotelId) {
+    try {
+      const response = await getHotelRoomsWithDetails(token, hotelId);
+      setRooms(response);
+    } catch (error) {
+      toast.error('Erro inesperado!', error.message);
+    }
+  }
+
   async function createBookingRoom() {
     try {
       await bookRoomById(token, selectedRoom);
+      getBooking();
       toast('Reservado!');
     } catch (error) {
       toast.error('Erro inesperado!');
@@ -82,7 +83,7 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
 
   async function updateBookingRoom() {
     try {
-      await updateRoomById(token, selectedRoom, bookingData.id);
+      await updateRoomById(token, selectedRoom, booking.id);
       setUpdateRoom(false);
       toast('Quarto alterado com sucesso!');
     } catch (error) {
@@ -90,29 +91,32 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
     }
   }
 
-  if(bookingData && !updateRoom) {
+  if (bookedHotel && bookedRoom && !updateRoom) {
     return (
       <Container>
         <StyledTypography variant="h6">Você já escolheu seu quarto:</StyledTypography>
         <Caixas>
           <Card>
-            <Image url={bookingHotel.image} />       
-            <Title>{bookingHotel.name}</Title>
+            <Image url={bookedHotel.image} />
+            <Title>{bookedHotel.name}</Title>
             <ContainerText>
               <strong>Quarto reservado</strong>
-              <span>{bookingData.Room.name} ({bookingData.Room.capacity === 1 ? ('Single') : bookingData.Room.capacity === 2 ? ('Double') : 'Triple'})</span>
+              <span>
+                {bookedRoom.name} ({RoomCategories[bookedRoom.capacity]})
+              </span>
             </ContainerText>
             <ContainerText>
               <strong>Pessoas no seu quarto </strong>
-              <span>{ roomQtd.availability.occupied === 1 ? 'Você sozinho' : `Você e mais ${roomQtd.availability.occupied - 1}` }</span>
+              <span>
+                {bookedRoom._count.Booking === 1 ? 'Você sozinho' : `Você e mais ${bookedRoom._count.Booking - 1}`}
+              </span>
             </ContainerText>
           </Card>
         </Caixas>
         <UpdateButton onClick={() => setUpdateRoom(true)}>TROCAR DE QUARTO</UpdateButton>
       </Container>
     );
-  }
-  else if (!includedHotel) {
+  } else if (!ticket?.TicketType.includesHotel) {
     return (
       <ErrorContainer>
         <h1>
@@ -121,40 +125,50 @@ export default function ChooseTicket({ showBooking, setShowBooking }) {
         </h1>
       </ErrorContainer>
     );
-  } else if (paymentStatus === 'RESERVED') {
+  } else if (ticket?.status !== 'PAID') {
     return (
       <ErrorContainer>
         <h1>Você precisa ter confirmado pagamento antes de fazer a escolha de hospedagem</h1>
       </ErrorContainer>
     );
-  } else {
-    return (
-      <>
-        {hotelsData ? (
-          <Container>
-            <StyledTypography variant="h6">Primeiro, escolha o seu hotel</StyledTypography>
-            <Cards>
-              {hotelsData.map((item) => (
-                <CardHotel key={item.id} hotel={item} select={onSelectHotel} selectedHotel={selectedHotel} getRooms={fetchHotelWithRoomsData} />
-              ))}
-            </Cards>
-          </Container>
-        ) : (
-          <></>
-        )}
-
-        {hotelsData && selectedHotel ? (
-          <Container>
-            <StyledTypography variant="h6">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
-            {hotelsData && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
-            {updateRoom ? <ConfirmationButton onClick={updateBookingRoom}>TROCAR QUARTO</ConfirmationButton> : <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
-            } </Container>
-        ) : (
-          <></>
-        )}
-      </>
-    );
   }
+
+  return (
+    <>
+      {hotelsData ? (
+        <Container>
+          <StyledTypography variant="h6">Primeiro, escolha o seu hotel</StyledTypography>
+          <Cards>
+            {hotelsData.map((item) => (
+              <CardHotel
+                key={item.id}
+                hotel={item}
+                select={onSelectHotel}
+                selectedHotel={selectedHotel}
+                getRooms={fetchHotelWithRoomsData}
+              />
+            ))}
+          </Cards>
+        </Container>
+      ) : (
+        <></>
+      )}
+
+      {hotelsData && selectedHotel ? (
+        <Container>
+          <StyledTypography variant="h6">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
+          {hotelsData && <Rooms selectedRoom={selectedRoom} rooms={rooms} setSelectedRoom={setSelectedRoom} />}
+          {updateRoom ? (
+            <ConfirmationButton onClick={updateBookingRoom}>TROCAR QUARTO</ConfirmationButton>
+          ) : (
+            <ConfirmationButton onClick={createBookingRoom}>RESERVAR QUARTO</ConfirmationButton>
+          )}
+        </Container>
+      ) : (
+        <></>
+      )}
+    </>
+  );
 }
 
 const Caixas = styled.div`
@@ -163,6 +177,7 @@ const Caixas = styled.div`
   align-items: flex-start;
   justify-content: flex-start;
 `;
+
 const Card = styled.div`
   display: flex;
   flex-direction: column;
@@ -174,7 +189,7 @@ const Card = styled.div`
   margin-right: 25px;
   margin-top: 15px;
   padding: 15px;
-  background: #FFEED2;
+  background: #ffeed2;
 `;
 const Image = styled.div`
   width: 168px;
