@@ -77,7 +77,7 @@ const locationsRes = [
 
 export default function Activities() {
   const token = useToken();
-  // const { ticket, ticketLoading } = useTicket();
+  const { ticket, ticketLoading } = useTicket();
 
   const [activities, setActivities] = useState(null);
 
@@ -87,9 +87,9 @@ export default function Activities() {
     fetchActivitiesByDate(dayjs('2023-03-30').toDate());
   }, []);
 
-  // if (ticketLoading) {
-  //   return <>Carregando</>;
-  // }
+  if (ticketLoading) {
+    return <>Carregando</>;
+  }
 
   async function fetchActivitiesByDate(date) {
     try {
@@ -101,6 +101,37 @@ export default function Activities() {
     } catch (error) {
       toast.error(error.message);
     }
+  }
+
+  if (!ticket?.TicketType.includesHotel) {
+    return (
+      <ErrorContainer>
+        <h1>Sua modalidade de ingresso não necessita escolher atividade. Você terá acesso a todas as atividades.</h1>
+      </ErrorContainer>
+    );
+  } else if (ticket?.status !== 'PAID') {
+    return (
+      <ErrorContainer>
+        <h1>Você precisa ter confirmado pagamento antes de fazer a escolha de atividades.</h1>
+      </ErrorContainer>
+    );
+  } else {
+    return (
+      <Container>
+        <StyledTypography variant="h6">Primeiro, filtre pelo dia do evento:</StyledTypography>
+        <ContainerCard>
+          <CardDay>
+            <p>27/03</p>
+          </CardDay>
+          <CardDay>
+            <p>27/03</p>
+          </CardDay>
+          <CardDay>
+            <p>27/03</p>
+          </CardDay>
+        </ContainerCard>
+      </Container>
+    );
   }
 
   return (
@@ -127,37 +158,6 @@ export default function Activities() {
       </LocationsContainer>
     </>
   );
-
-  // if (!ticket?.TicketType.includesHotel) {
-  //   return (
-  //     <ErrorContainer>
-  //       <h1>Sua modalidade de ingresso não necessita escolher atividade. Você terá acesso a todas as atividades.</h1>
-  //     </ErrorContainer>
-  //   );
-  // } else if (ticket?.status !== 'PAID') {
-  //   return (
-  //     <ErrorContainer>
-  //       <h1>Você precisa ter confirmado pagamento antes de fazer a escolha de atividades.</h1>
-  //     </ErrorContainer>
-  //   );
-  // } else {
-  //   return (
-  //     <Container>
-  //       <StyledTypography variant="h6">Primeiro, filtre pelo dia do evento:</StyledTypography>
-  //       <ContainerCard>
-  //         <CardDay>
-  //           <p>27/03</p>
-  //         </CardDay>
-  //         <CardDay>
-  //           <p>27/03</p>
-  //         </CardDay>
-  //         <CardDay>
-  //           <p>27/03</p>
-  //         </CardDay>
-  //       </ContainerCard>
-  //     </Container>
-  //   );
-  // }
 }
 
 const ErrorContainer = styled.div`
