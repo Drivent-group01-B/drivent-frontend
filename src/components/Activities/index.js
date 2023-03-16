@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import useTicket from '../../hooks/api/useTicket';
+import Typography from '@material-ui/core/Typography';
 
 export default function Activities() {
   const { ticket } = useTicket();
@@ -22,7 +23,16 @@ export default function Activities() {
       </ErrorContainer>
     );
   } else {
-    return <></>;
+    return (
+        <Container>
+          <StyledTypography variant="h6">Primeiro, filtre pelo dia do evento:</StyledTypography>
+          <ContainetCard>
+          <CardDay><p>27/03</p></CardDay>
+          <CardDay><p>27/03</p></CardDay>
+          <CardDay><p>27/03</p></CardDay>
+          </ContainetCard>
+        </Container>
+    );
   }
 }
 
@@ -43,5 +53,41 @@ const ErrorContainer = styled.div`
     text-align: center;
 
     color: #8e8e8e;
+  }
+`;
+
+const StyledTypography = styled(Typography)`
+  color: gray;
+  margin: 36px 0 18px !important;
+`;
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const ContainetCard = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 17px;  
+`;
+
+const CardDay = styled.div`
+  width: 131px;
+  height: 37px;  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #E0E0E0;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+
+  p{
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 16px;
   }
 `;
