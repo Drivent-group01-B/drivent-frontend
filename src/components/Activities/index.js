@@ -8,7 +8,7 @@ import ActivityCard from './ActivityCard';
 const activitiesRes = [
   {
     id: 9,
-    name: 'Workshop - Empreendedorismo em TECH',
+    name: 'LOL: Controle de wave ',
     vacancies: 2,
     start_at: '2023-03-29T08:00:00.000Z',
     end_at: '2023-03-29T09:00:00.000Z',
@@ -20,8 +20,8 @@ const activitiesRes = [
   },
   {
     id: 10,
-    name: 'Workshop - Redis',
-    vacancies: 10,
+    name: 'Valorant: Spots do Sova',
+    vacancies: 0,
     start_at: '2023-03-29T09:00:00.000Z',
     end_at: '2023-03-29T10:00:00.000Z',
     eventId: 5,
@@ -29,6 +29,18 @@ const activitiesRes = [
     createdAt: '2023-03-16T19:03:44.215Z',
     updatedAt: '2023-03-16T19:03:44.215Z',
     subscribed: false,
+  },
+  {
+    id: 12,
+    name: 'Fortnite: Double Pump',
+    vacancies: 27,
+    start_at: '2023-03-29T13:00:00.000Z',
+    end_at: '2023-03-29T14:30:00.000Z',
+    eventId: 5,
+    locationId: 6,
+    createdAt: '2023-03-16T19:03:44.215Z',
+    updatedAt: '2023-03-16T19:03:44.215Z',
+    subscribed: true,
   },
   {
     id: 11,
@@ -80,6 +92,7 @@ export default function Activities() {
                     startAt={act.start_at}
                     endAt={act.end_at}
                     vacancies={act.vacancies}
+                    subscribed={act.subscribed}
                   />
                 )
             )}

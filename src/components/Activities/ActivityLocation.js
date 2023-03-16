@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export default function ActivityLocation({ title, children }) {
   return (
     <Container>
-      <p className="title">Auditório Principal</p>
+      <p className="title">{title}</p>
       <Wrapper>{children}</Wrapper>
     </Container>
   );
@@ -30,6 +30,8 @@ const Container = styled.div`
 const Wrapper = styled.div`
   padding: 14px;
   border: 1px solid #d7d7d7;
+  width: 290px;
+  height: 100%;
 
   display: flex;
   flex-direction: column;

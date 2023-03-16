@@ -2,11 +2,12 @@ import styled from 'styled-components';
 import * as Bi from 'react-icons/bi';
 import dayjs from 'dayjs';
 
-export default function ActivityCard({ title, startAt, endAt, vacancies }) {
-  const duration = dayjs(endAt).diff(startAt, 'hour');
+export default function ActivityCard({ title, startAt, endAt, vacancies, subscribed }) {
+  const duration = dayjs(endAt).diff(startAt, 'm');
 
   startAt = dayjs(startAt).format('HH:MM');
   endAt = dayjs(endAt).format('hh:mm');
+  const full = vacancies <= 0;
 
   return (
     <Card duration={duration}>
@@ -16,8 +17,20 @@ export default function ActivityCard({ title, startAt, endAt, vacancies }) {
           {startAt} - {endAt}
         </p>
       </Content>
-      <TotalVacancies>
-        <Bi.BiDoorOpen size="18px" /> {vacancies} vagas
+      <TotalVacancies full={full && !subscribed}>
+        {subscribed ? (
+          <>
+            <Bi.BiCheckCircle size="18px" /> Inscrito
+          </>
+        ) : full ? (
+          <>
+            <Bi.BiXCircle size="18px" /> Esgotado
+          </>
+        ) : (
+          <>
+            <Bi.BiDoorOpen size="18px" /> {vacancies} vagas
+          </>
+        )}
       </TotalVacancies>
     </Card>
   );
@@ -26,7 +39,7 @@ export default function ActivityCard({ title, startAt, endAt, vacancies }) {
 const Card = styled.div`
   width: 265px;
   min-height: 80px;
-  height: ${({ duration }) => duration * 80}px;
+  height: ${({ duration }) => (duration / 60) * 80}px;
 
   padding: 10px;
 
@@ -61,6 +74,7 @@ const TotalVacancies = styled.div`
 
   border-left: 1px solid #cfcfcf;
 
-  color: #078632;
+  color: ${({ full }) => (full ? '#CC6666' : '#078632')};
+
   font-size: 9px;
 `;
