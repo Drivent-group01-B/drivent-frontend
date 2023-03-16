@@ -16,7 +16,7 @@ import useTicket from '../../hooks/api/useTicket';
 
 const RoomCategories = { 1: 'Single', 2: 'Double', 3: 'Triple' };
 
-export default function ChooseTicket() {
+export default function Hotel() {
   const token = useToken();
   const { ticket, ticketLoading } = useTicket();
   const { booking, bookingLoading, getBooking } = useBooking();
