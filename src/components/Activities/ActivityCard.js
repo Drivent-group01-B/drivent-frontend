@@ -1,15 +1,23 @@
 import styled from 'styled-components';
 import * as Bi from 'react-icons/bi';
+import dayjs from 'dayjs';
 
 export default function ActivityCard({ title, startAt, endAt, vacancies }) {
+  const duration = dayjs(endAt).diff(startAt, 'hour');
+
+  startAt = dayjs(startAt).format('HH:MM');
+  endAt = dayjs(endAt).format('hh:mm');
+
   return (
-    <Card>
+    <Card duration={duration}>
       <Content>
-        <p className="title">Minecraft: montando o PC ideal</p>
-        <p className="time">09:00 - 10:00</p>
+        <p className="title">{title}</p>
+        <p className="time">
+          {startAt} - {endAt}
+        </p>
       </Content>
       <TotalVacancies>
-        <Bi.BiDoorOpen size="18px" /> 27 vagas
+        <Bi.BiDoorOpen size="18px" /> {vacancies} vagas
       </TotalVacancies>
     </Card>
   );
@@ -17,7 +25,8 @@ export default function ActivityCard({ title, startAt, endAt, vacancies }) {
 
 const Card = styled.div`
   width: 265px;
-  height: 79px;
+  min-height: 80px;
+  height: ${({ duration }) => duration * 80}px;
 
   padding: 10px;
 
@@ -40,6 +49,7 @@ const Content = styled.div`
 
   .time {
     font-weight: 400;
+    margin-top: 6px;
   }
 `;
 
