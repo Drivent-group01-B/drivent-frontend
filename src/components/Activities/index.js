@@ -4,6 +4,10 @@ import useTicket from '../../hooks/api/useTicket';
 import Typography from '@material-ui/core/Typography';
 import ActivityLocation from './ActivityLocation';
 import ActivityCard from './ActivityCard';
+import { getActivitiesByDate } from '../../services/activitiesApi';
+import { toast } from 'react-toastify';
+import useToken from '../../hooks/useToken';
+import dayjs from 'dayjs';
 
 const activitiesRes = [
   {
@@ -72,10 +76,31 @@ const locationsRes = [
 ];
 
 export default function Activities() {
-  const { ticket, ticketLoading } = useTicket();
+  const token = useToken();
+  // const { ticket, ticketLoading } = useTicket();
 
-  if (ticketLoading) {
-    return <>Carregando</>;
+  const [activities, setActivities] = useState(null);
+
+  useEffect(() => {
+    //EXEMPLO - A DATA DEVE SER YYYY-MM-DD,
+    //QQR COISA USAR O DAYJS IGUAL NO EXEMPLO
+    fetchActivitiesByDate(dayjs('2023-03-30').toDate());
+  }, []);
+
+  // if (ticketLoading) {
+  //   return <>Carregando</>;
+  // }
+
+  async function fetchActivitiesByDate(date) {
+    try {
+      const res = await getActivitiesByDate(token, date);
+
+      //ALTERAR DEPOIS
+      // setActivities(res);
+      setActivities(activitiesRes);
+    } catch (error) {
+      toast.error(error.message);
+    }
   }
 
   return (
@@ -83,19 +108,20 @@ export default function Activities() {
       <LocationsContainer>
         {locationsRes.map((location) => (
           <ActivityLocation key={location.id} title={location.name}>
-            {activitiesRes.map(
-              (act) =>
-                act.locationId === location.id && (
-                  <ActivityCard
-                    key={act.id}
-                    title={act.name}
-                    startAt={act.start_at}
-                    endAt={act.end_at}
-                    vacancies={act.vacancies}
-                    subscribed={act.subscribed}
-                  />
-                )
-            )}
+            {activities &&
+              activities.map(
+                (act) =>
+                  act.locationId === location.id && (
+                    <ActivityCard
+                      key={act.id}
+                      title={act.name}
+                      startAt={act.start_at}
+                      endAt={act.end_at}
+                      vacancies={act.vacancies}
+                      subscribed={act.subscribed}
+                    />
+                  )
+              )}
           </ActivityLocation>
         ))}
       </LocationsContainer>
@@ -170,7 +196,6 @@ const Container = styled.div`
 const LocationsContainer = styled(Container)`
   flex-direction: row;
   overflow: auto;
-  /* height: 100%; */
 
   &::-webkit-scrollbar {
     background: #f1f1f1;
