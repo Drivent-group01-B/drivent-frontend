@@ -38,7 +38,7 @@ export default function ActivityCard({ title, startAt, endAt, vacancies, subscri
 }
 
 const Card = styled.div`
-  width: 265px;
+  width: 100%;
   min-height: 80px;
   height: ${({ duration }) => (duration / 60) * 80}px;
 

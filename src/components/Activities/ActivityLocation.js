@@ -11,7 +11,7 @@ export default function ActivityLocation({ title, children }) {
 
 const Container = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-flow: column;
   margin-bottom: 8px;
 
   & > .title {
@@ -31,9 +31,26 @@ const Wrapper = styled.div`
   padding: 14px;
   border: 1px solid #d7d7d7;
   width: 290px;
-  height: 100%;
 
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  height: 390px;
+
+  overflow: auto;
+
+  &::-webkit-scrollbar {
+    background: #f1f1f1;
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cfcfcf;
+    border-radius: 10px;
+
+    &:hover {
+      background: #9d9d9d;
+    }
+  }
 `;
