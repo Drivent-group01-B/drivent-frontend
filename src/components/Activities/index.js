@@ -2,15 +2,24 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import useTicket from '../../hooks/api/useTicket';
 import Typography from '@material-ui/core/Typography';
+import { getActivities, getDaysOfActivities } from '../../services/activitiesApi';
+import useToken from '../../hooks/useToken';
 
 export default function Activities() {
   const { ticket } = useTicket();
+  const token = useToken();
+  const [days, setDays] = useState([]);
+
+  useEffect(async() => {
+    const days = await getDaysOfActivities(token);
+    setDays(days);
+  }, []);
 
   if (!ticket?.TicketType.includesHotel) {
     return (
       <ErrorContainer>
         <h1>
-        Sua modalidade de ingresso não necessita escolher atividade. Você terá acesso a todas as atividades.
+          Sua modalidade de ingresso não necessita escolher atividade. Você terá acesso a todas as atividades.
         </h1>
       </ErrorContainer>
     );
@@ -18,20 +27,20 @@ export default function Activities() {
     return (
       <ErrorContainer>
         <h1>
-        Você precisa ter confirmado pagamento antes de fazer a escolha de atividades.
+          Você precisa ter confirmado pagamento antes de fazer a escolha de atividades.
         </h1>
       </ErrorContainer>
     );
   } else {
     return (
-        <Container>
-          <StyledTypography variant="h6">Primeiro, filtre pelo dia do evento:</StyledTypography>
-          <ContainetCard>
-          <CardDay><p>27/03</p></CardDay>
-          <CardDay><p>27/03</p></CardDay>
-          <CardDay><p>27/03</p></CardDay>
-          </ContainetCard>
-        </Container>
+      <Container>
+        <StyledTypography variant="h6">Primeiro, filtre pelo dia do evento:</StyledTypography>
+        <ContainetCard>
+          {days?.map((day) => {
+            <CardDay><p>{day}</p></CardDay>
+          })}
+        </ContainetCard>
+      </Container>
     );
   }
 }
