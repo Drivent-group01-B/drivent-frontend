@@ -1,13 +1,14 @@
 import styled from 'styled-components';
 import * as Bi from 'react-icons/bi';
 import dayjs from 'dayjs';
+import 'dayjs/locale/pt-br';
 
 export default function ActivityCard({ title, startAt, endAt, vacancies, subscribed }) {
   const duration = dayjs(endAt).diff(startAt, 'm');
-
-  startAt = dayjs(startAt).format('HH:MM');
-  endAt = dayjs(endAt).format('hh:mm');
   const full = vacancies <= 0;
+  //ARRUMAR A HORA -3H
+  startAt = dayjs(startAt).add(3, 'h').format('HH:mm');
+  endAt = dayjs(endAt).add(3, 'h').format('HH:mm');
 
   return (
     <Card duration={duration}>
