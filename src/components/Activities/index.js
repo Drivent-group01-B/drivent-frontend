@@ -13,7 +13,7 @@ const activitiesRes = [
   {
     id: 9,
     name: 'LOL: Controle de wave ',
-    vacancies: 2,
+    availableVacancies: 2,
     start_at: '2023-03-29T08:00:00.000Z',
     end_at: '2023-03-29T09:00:00.000Z',
     eventId: 5,
@@ -25,7 +25,7 @@ const activitiesRes = [
   {
     id: 10,
     name: 'Valorant: Spots do Sova',
-    vacancies: 0,
+    availableVacancies: 0,
     start_at: '2023-03-29T09:00:00.000Z',
     end_at: '2023-03-29T10:00:00.000Z',
     eventId: 5,
@@ -37,7 +37,7 @@ const activitiesRes = [
   {
     id: 12,
     name: 'Fortnite: Double Pump',
-    vacancies: 27,
+    availableVacancies: 27,
     start_at: '2023-03-29T13:00:00.000Z',
     end_at: '2023-03-29T14:30:00.000Z',
     eventId: 5,
@@ -49,7 +49,7 @@ const activitiesRes = [
   {
     id: 11,
     name: 'Valorant: Pixel de Viper',
-    vacancies: 10,
+    availableVacancies: 10,
     start_at: '2023-03-29T09:00:00.000Z',
     end_at: '2023-03-29T11:00:00.000Z',
     eventId: 5,
@@ -117,7 +117,7 @@ export default function Activities() {
                       title={act.name}
                       startAt={act.start_at}
                       endAt={act.end_at}
-                      vacancies={act.vacancies}
+                      vacancies={act.availableVacancies}
                       subscribed={act.subscribed}
                     />
                   )
