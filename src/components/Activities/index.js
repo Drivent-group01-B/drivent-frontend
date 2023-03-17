@@ -15,7 +15,7 @@ export default function Activities() {
     setDays(days);
   }, []);
 
-  if (!ticket?.TicketType.includesHotel) {
+  if (ticket?.TicketType.isRemote) {
     return (
       <ErrorContainer>
         <h1>
@@ -36,9 +36,9 @@ export default function Activities() {
       <Container>
         <StyledTypography variant="h6">Primeiro, filtre pelo dia do evento:</StyledTypography>
         <ContainetCard>
-          {days?.map((day) => {
-            <CardDay><p>{day}</p></CardDay>
-          })}
+          {days.map((day) => (
+            <CardDay key={day.id}><p>{day.dateEvent.slice(0,10)}</p></CardDay>
+          ))}
         </ContainetCard>
       </Container>
     );
