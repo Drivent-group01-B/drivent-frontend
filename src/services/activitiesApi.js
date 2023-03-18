@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import api from './api';
 
 export async function getDaysOfActivities(token) {

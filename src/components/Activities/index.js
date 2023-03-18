@@ -5,88 +5,22 @@ import useTicket from '../../hooks/api/useTicket';
 import Typography from '@material-ui/core/Typography';
 import ActivityLocation from './ActivityLocation';
 import ActivityCard from './ActivityCard';
-import { getActivitiesByDate, getActivities, getDaysOfActivities } from '../../services/activitiesApi';
+import { getActivitiesByDate, getDaysOfActivities, getLocations } from '../../services/activitiesApi';
 import { toast } from 'react-toastify';
 import useToken from '../../hooks/useToken';
 import dayjs from 'dayjs';
-
-const activitiesRes = [
-  {
-    id: 9,
-    name: 'LOL: Controle de wave ',
-    availableVacancies: 2,
-    start_at: '2023-03-29T08:00:00.000Z',
-    end_at: '2023-03-29T09:00:00.000Z',
-    eventId: 5,
-    locationId: 6,
-    createdAt: '2023-03-16T19:03:44.215Z',
-    updatedAt: '2023-03-16T19:03:44.215Z',
-    subscribed: false,
-  },
-  {
-    id: 10,
-    name: 'Valorant: Spots do Sova',
-    availableVacancies: 0,
-    start_at: '2023-03-29T09:00:00.000Z',
-    end_at: '2023-03-29T10:00:00.000Z',
-    eventId: 5,
-    locationId: 6,
-    createdAt: '2023-03-16T19:03:44.215Z',
-    updatedAt: '2023-03-16T19:03:44.215Z',
-    subscribed: false,
-  },
-  {
-    id: 12,
-    name: 'Fortnite: Double Pump',
-    availableVacancies: 27,
-    start_at: '2023-03-29T13:00:00.000Z',
-    end_at: '2023-03-29T14:30:00.000Z',
-    eventId: 5,
-    locationId: 6,
-    createdAt: '2023-03-16T19:03:44.215Z',
-    updatedAt: '2023-03-16T19:03:44.215Z',
-    subscribed: true,
-  },
-  {
-    id: 11,
-    name: 'Valorant: Pixel de Viper',
-    availableVacancies: 10,
-    start_at: '2023-03-29T09:00:00.000Z',
-    end_at: '2023-03-29T11:00:00.000Z',
-    eventId: 5,
-    locationId: 4,
-    createdAt: '2023-03-16T19:03:44.215Z',
-    updatedAt: '2023-03-16T19:03:44.215Z',
-    subscribed: false,
-  },
-];
-
-const locationsRes = [
-  {
-    id: 6,
-    name: 'Auditório Ascent',
-  },
-  {
-    id: 5,
-    name: 'Sala Pearl',
-  },
-  {
-    id: 4,
-    name: 'Sala Fracture',
-  },
-];
 
 export default function Activities() {
   const token = useToken();
   const { ticket, ticketLoading } = useTicket();
   const [days, setDays] = useState([]);
+  const [activities, setActivities] = useState(null);
+  const [locations, setLocations] = useState(null);
 
   useEffect(async () => {
     const days = await getDaysOfActivities(token);
     setDays(days);
   }, []);
-
-  const [activities, setActivities] = useState(null);
 
   if (ticketLoading) {
     return <>Carregando</>;
@@ -94,11 +28,11 @@ export default function Activities() {
 
   async function fetchActivitiesByDate(date) {
     try {
-      const res = await getActivitiesByDate(token, date);
+      const activitiesData = await getActivitiesByDate(token, new Date(date));
 
-      // ALTERAR DEPOIS
-      // setActivities(res);
-      setActivities(activitiesRes);
+      const locationsData = await getLocations(token);
+      setLocations(locationsData);
+      setActivities(activitiesData);
     } catch (error) {
       toast.error(error.message);
     }
@@ -122,41 +56,38 @@ export default function Activities() {
         <StyledTypography variant="h6">Primeiro, filtre pelo dia do evento:</StyledTypography>
         <ContainerCard>
           {days.map((day) => (
-            <CardDay key={day.id}>
+            <CardDay key={day.id} onClick={() => fetchActivitiesByDate(day.dateEvent.slice(0, 10))}>
               <p>
                 {dayjs(day.dateEvent).locale('pt-br').format('ddd')}, {dayjs(day.dateEvent).format('DD/MM')}
               </p>
             </CardDay>
           ))}
         </ContainerCard>
+
+        <LocationsContainer>
+          {locations &&
+            locations.map((location) => (
+              <ActivityLocation key={location.id} title={location.name}>
+                {activities &&
+                  activities.map(
+                    (act) =>
+                      act.locationId === location.id && (
+                        <ActivityCard
+                          key={act.id}
+                          title={act.name}
+                          startAt={act.start_at}
+                          endAt={act.end_at}
+                          vacancies={act.availableVacancies}
+                          subscribed={act.subscribed}
+                        />
+                      )
+                  )}
+              </ActivityLocation>
+            ))}
+        </LocationsContainer>
       </Container>
     );
   }
-
-  return (
-    <>
-      <LocationsContainer>
-        {locationsRes.map((location) => (
-          <ActivityLocation key={location.id} title={location.name}>
-            {activitiesRes &&
-              activitiesRes.map(
-                (act) =>
-                  act.locationId === location.id && (
-                    <ActivityCard
-                      key={act.id}
-                      title={act.name}
-                      startAt={act.start_at}
-                      endAt={act.end_at}
-                      vacancies={act.availableVacancies}
-                      subscribed={act.subscribed}
-                    />
-                  )
-              )}
-          </ActivityLocation>
-        ))}
-      </LocationsContainer>
-    </>
-  );
 }
 
 const ErrorContainer = styled.div`
@@ -234,5 +165,9 @@ const CardDay = styled.div`
     font-weight: 400;
     font-size: 14px;
     line-height: 16px;
+  }
+
+  &:hover {
+    cursor: pointer;
   }
 `;
