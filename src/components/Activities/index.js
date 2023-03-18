@@ -1,10 +1,11 @@
+/* eslint-disable space-before-function-paren */
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import useTicket from '../../hooks/api/useTicket';
 import Typography from '@material-ui/core/Typography';
 import ActivityLocation from './ActivityLocation';
 import ActivityCard from './ActivityCard';
-import { getActivitiesByDate } from '../../services/activitiesApi';
+import { getActivitiesByDate, getActivities, getDaysOfActivities } from '../../services/activitiesApi';
 import { toast } from 'react-toastify';
 import useToken from '../../hooks/useToken';
 import dayjs from 'dayjs';
@@ -78,14 +79,14 @@ const locationsRes = [
 export default function Activities() {
   const token = useToken();
   const { ticket, ticketLoading } = useTicket();
+  const [days, setDays] = useState([]);
+
+  useEffect(async () => {
+    const days = await getDaysOfActivities(token);
+    setDays(days);
+  }, []);
 
   const [activities, setActivities] = useState(null);
-
-  useEffect(() => {
-    //EXEMPLO - A DATA DEVE SER YYYY-MM-DD,
-    //QQR COISA USAR O DAYJS IGUAL NO EXEMPLO
-    fetchActivitiesByDate(dayjs('2023-03-30').toDate());
-  }, []);
 
   if (ticketLoading) {
     return <>Carregando</>;
@@ -95,7 +96,7 @@ export default function Activities() {
     try {
       const res = await getActivitiesByDate(token, date);
 
-      //ALTERAR DEPOIS
+      // ALTERAR DEPOIS
       // setActivities(res);
       setActivities(activitiesRes);
     } catch (error) {
@@ -103,7 +104,7 @@ export default function Activities() {
     }
   }
 
-  if (!ticket?.TicketType.includesHotel) {
+  if (ticket?.TicketType.isRemote) {
     return (
       <ErrorContainer>
         <h1>Sua modalidade de ingresso não necessita escolher atividade. Você terá acesso a todas as atividades.</h1>
@@ -120,15 +121,13 @@ export default function Activities() {
       <Container>
         <StyledTypography variant="h6">Primeiro, filtre pelo dia do evento:</StyledTypography>
         <ContainerCard>
-          <CardDay>
-            <p>27/03</p>
-          </CardDay>
-          <CardDay>
-            <p>27/03</p>
-          </CardDay>
-          <CardDay>
-            <p>27/03</p>
-          </CardDay>
+          {days.map((day) => (
+            <CardDay key={day.id}>
+              <p>
+                {dayjs(day.dateEvent).locale('pt-br').format('ddd')}, {dayjs(day.dateEvent).format('DD/MM')}
+              </p>
+            </CardDay>
+          ))}
         </ContainerCard>
       </Container>
     );
@@ -139,8 +138,8 @@ export default function Activities() {
       <LocationsContainer>
         {locationsRes.map((location) => (
           <ActivityLocation key={location.id} title={location.name}>
-            {activities &&
-              activities.map(
+            {activitiesRes &&
+              activitiesRes.map(
                 (act) =>
                   act.locationId === location.id && (
                     <ActivityCard
