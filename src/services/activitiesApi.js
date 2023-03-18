@@ -22,11 +22,21 @@ export async function getActivities(token) {
 }
 
 export async function getActivitiesByDate(token, date) {
-  const parsedDate = dayjs(date).format('YYYY-MM-DD');
+  const parsedDate = date.toISOString().slice(0, 10);
 
   if (parsedDate === 'Invalid Date') throw Error('Date format must be YYYY-MM-DD');
 
-  const res = await api.get(`activities?date=${parsedDate}`, {
+  const res = await api.get(`/activities?date=${parsedDate}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+}
+
+export async function getLocations(token) {
+  const res = await api.get('/activities/locations', {
     headers: {
       Authorization: `Bearer ${token}`,
     },
