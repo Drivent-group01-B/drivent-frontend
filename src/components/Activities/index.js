@@ -1,3 +1,4 @@
+/* eslint-disable array-callback-return */
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import useTicket from '../../hooks/api/useTicket';
@@ -37,7 +38,7 @@ export default function Activities() {
         <StyledTypography variant="h6">Primeiro, filtre pelo dia do evento:</StyledTypography>
         <ContainetCard>
           {days?.map((day) => {
-            <CardDay><p>{day}</p></CardDay>
+            <CardDay><p>{day}</p></CardDay>;
           })}
         </ContainetCard>
       </Container>
