@@ -43,3 +43,24 @@ export async function getLocations(token) {
 
   return res.data;
 }
+
+export async function postSubscriptions(token, activityId) {
+  const body = { activityId: activityId };
+  const res = await api.post('/activities/subscriptions', body, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+}
+
+export async function getSubscriptions(token, activityId) {
+  const res = await api.get(`/activities/subscriptions/${activityId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+}
+

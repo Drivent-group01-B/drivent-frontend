@@ -16,11 +16,12 @@ export default function Activities() {
   const [days, setDays] = useState([]);
   const [activities, setActivities] = useState(null);
   const [locations, setLocations] = useState(null);
+  const [att, setAtt] = useState(1);
 
   useEffect(async () => {
     const days = await getDaysOfActivities(token);
     setDays(days);
-  }, []);
+  }, [att]);
 
   if (ticketLoading) {
     return <>Carregando</>;
@@ -74,11 +75,14 @@ export default function Activities() {
                       act.locationId === location.id && (
                         <ActivityCard
                           key={act.id}
+                          id={act.id}
                           title={act.name}
                           startAt={act.start_at}
                           endAt={act.end_at}
-                          vacancies={act.availableVacancies}
+                          vacancies={act.vacancies}
+                          setAtt={setAtt}
                           subscribed={act.subscribed}
+
                         />
                       )
                   )}
