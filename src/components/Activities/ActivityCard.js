@@ -7,17 +7,17 @@ import useToken from '../../hooks/useToken';
 import { getSubscriptions, postSubscriptions } from '../../services/activitiesApi';
 import { toast } from 'react-toastify';
 
+
 export default function ActivityCard({ id, title, startAt, endAt, vacancies, setAtt }) {
   const token = useToken();
   const [subscribed, setSubscribed] = useState(false);
   const [loadingSubscriptions, setLoadingSubscriptions] = useState(false);
-  
   const duration = dayjs(endAt).diff(startAt, 'm');
   const full = vacancies <= 0;
   //ARRUMAR A HORA -3H
   startAt = dayjs(startAt).add(3, 'h').format('HH:mm');
   endAt = dayjs(endAt).add(3, 'h').format('HH:mm');
-
+  
   useEffect(async() => {
     try {
       const sub = await getSubscriptions(token, id);
@@ -78,7 +78,9 @@ const Card = styled.div`
 
   background: #f1f1f1;
   border-radius: 5px;
+
   background: ${({ backcolor }) => (backcolor ? '#D0FFDB' : '#F1F1F1')}; 
+
   display: grid;
   grid-template-columns: 6fr 2fr;
 `;

@@ -81,6 +81,8 @@ export default function Activities() {
                           endAt={act.end_at}
                           vacancies={act.vacancies}
                           setAtt={setAtt}
+                          subscribed={act.subscribed}
+
                         />
                       )
                   )}

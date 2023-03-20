@@ -63,3 +63,4 @@ export async function getSubscriptions(token, activityId) {
   });
   return res.data;
 }
+
