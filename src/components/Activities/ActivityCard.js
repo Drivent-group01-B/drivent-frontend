@@ -1,3 +1,4 @@
+/* eslint-disable space-before-function-paren */
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import * as Bi from 'react-icons/bi';
@@ -6,7 +7,6 @@ import 'dayjs/locale/pt-br';
 import useToken from '../../hooks/useToken';
 import { getSubscriptions, postSubscriptions } from '../../services/activitiesApi';
 import { toast } from 'react-toastify';
-
 
 export default function ActivityCard({ id, title, startAt, endAt, vacancies, setAtt }) {
   const token = useToken();
@@ -17,20 +17,17 @@ export default function ActivityCard({ id, title, startAt, endAt, vacancies, set
   //ARRUMAR A HORA -3H
   startAt = dayjs(startAt).add(3, 'h').format('HH:mm');
   endAt = dayjs(endAt).add(3, 'h').format('HH:mm');
-  
-  useEffect(async() => {
+
+  useEffect(async () => {
     try {
       const sub = await getSubscriptions(token, id);
-      if(sub)
-      {
+      if (sub) {
         setSubscribed(true);
       }
-    } catch (error) {
-    }  
+    } catch (error) {}
   }, [loadingSubscriptions]);
 
-  async function postSubscription(activitiesId)
-  {
+  async function postSubscription(activitiesId) {
     try {
       setLoadingSubscriptions(true);
       const subscriptions = await postSubscriptions(token, activitiesId);
@@ -39,7 +36,7 @@ export default function ActivityCard({ id, title, startAt, endAt, vacancies, set
       toast.error(error.message);
       setLoadingSubscriptions(false);
     }
-    setLoadingSubscriptions(false); 
+    setLoadingSubscriptions(false);
   }
 
   return (
@@ -51,7 +48,9 @@ export default function ActivityCard({ id, title, startAt, endAt, vacancies, set
         </p>
       </Content>
       <TotalVacancies full={full && !subscribed}>
-        {false ? (<>loading</>) : subscribed ? (
+        {false ? (
+          <>loading</>
+        ) : subscribed ? (
           <>
             <Bi.BiCheckCircle size="18px" /> Inscrito
           </>
@@ -79,7 +78,7 @@ const Card = styled.div`
   background: #f1f1f1;
   border-radius: 5px;
 
-  background: ${({ backcolor }) => (backcolor ? '#D0FFDB' : '#F1F1F1')}; 
+  background: ${({ backcolor }) => (backcolor ? '#D0FFDB' : '#F1F1F1')};
 
   display: grid;
   grid-template-columns: 6fr 2fr;
